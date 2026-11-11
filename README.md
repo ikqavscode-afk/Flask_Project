@@ -12,6 +12,15 @@
 
 Сборник проектов на Python: веб-приложения на Flask, алгоритмы и консольное приложение на ООП.
 
+## Как это выглядит
+
+<p>
+  <img src="docs/screenshots/diary-cards.webp" alt="Flask Diary: список карточек с поиском и пагинацией" width="64%">
+  <img src="docs/screenshots/diary-mobile.webp" alt="Flask Diary на экране телефона" width="24%">
+</p>
+
+Больше снимков — в [описании Flask Diary](flask-diary/README.md#скриншоты).
+
 ## Проекты
 
 ### [Flask Diary](flask-diary/)
