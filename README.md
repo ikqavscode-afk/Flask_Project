@@ -47,6 +47,8 @@
 
 ## Заметки по проектам
 
+Как устроено приложение и как его расширять: [архитектура](docs/architecture.md).
+
 Решения, трудности и возможные улучшения: [Flask Diary](docs/flask-diary.md), [Notes Blog](docs/flask-notes-blog.md), [CLI Shop](docs/cli-shop.md), [Algorithms](docs/algorithms-dp.md).
 
 ## Структура репозитория

@@ -1,4 +1,4 @@
-from main import db
+from diary.extensions import db
 
 
 def test_health_ok(client):

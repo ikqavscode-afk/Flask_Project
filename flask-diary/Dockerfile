@@ -8,9 +8,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py config.py validation.py app_logging.py ./
-COPY static ./static
-COPY templates ./templates
+COPY main.py ./
+COPY diary ./diary
 COPY migrations ./migrations
 
 # Запуск не от root; /data — папка для базы данных

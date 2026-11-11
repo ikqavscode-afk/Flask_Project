@@ -1,8 +1,8 @@
 import pytest
 from sqlalchemy.orm import Session
 
-import main
-from main import db
+import diary.cards.views as card_views
+from diary.extensions import db
 
 
 def register(client, username='alice', password='secret123'):
@@ -65,8 +65,8 @@ def test_413_page(client):
     assert 'Слишком большой запрос' in html(response)
 
 
-def test_csrf_failure_shows_session_expired_page(test_app, client):
-    test_app.config['WTF_CSRF_ENABLED'] = True
+def test_csrf_failure_shows_session_expired_page(app, client):
+    app.config['WTF_CSRF_ENABLED'] = True
 
     response = client.post('/register', data={'username': 'mallory', 'password': 'secret123'})
 
@@ -74,15 +74,15 @@ def test_csrf_failure_shows_session_expired_page(test_app, client):
     assert 'Сессия устарела' in html(response)
 
 
-def test_500_page_hides_error_details(test_app, client, monkeypatch):
+def test_500_page_hides_error_details(app, client, monkeypatch):
     register(client)
     login(client)
-    monkeypatch.setitem(test_app.config, 'PROPAGATE_EXCEPTIONS', False)
+    monkeypatch.setitem(app.config, 'PROPAGATE_EXCEPTIONS', False)
 
     def boom(*args, **kwargs):
         raise RuntimeError('секретная трассировка и пароль базы')
 
-    monkeypatch.setattr(main, 'validate_card', boom)
+    monkeypatch.setattr(card_views, 'validate_card', boom)
 
     response = client.post('/form_create', data={'title': 't', 'subtitle': '', 'text': 'x'})
 
@@ -93,11 +93,11 @@ def test_500_page_hides_error_details(test_app, client, monkeypatch):
     assert 'Traceback' not in page
 
 
-def test_500_page_renders_even_when_database_is_down(test_app, client, monkeypatch):
+def test_500_page_renders_even_when_database_is_down(app, client, monkeypatch):
     """Страница ошибки не обращается к базе, иначе при сбое базы упала бы и она."""
     register(client)
     login(client)
-    monkeypatch.setitem(test_app.config, 'PROPAGATE_EXCEPTIONS', False)
+    monkeypatch.setitem(app.config, 'PROPAGATE_EXCEPTIONS', False)
 
     def db_down(*args, **kwargs):
         raise RuntimeError('база недоступна')

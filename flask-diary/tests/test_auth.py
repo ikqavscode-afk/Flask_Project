@@ -1,4 +1,5 @@
-from main import db, User
+from diary.extensions import db
+from diary.models import User
 
 
 def register(client, username='alice', password='secret123'):
@@ -24,10 +25,10 @@ def test_register_page_opens(client):
     assert 'Регистрация'.encode('utf-8') in response.data
 
 
-def test_register_creates_user_in_db(test_app, client):
+def test_register_creates_user_in_db(app, client):
     register(client)
 
-    with test_app.app_context():
+    with app.app_context():
         user = db.session.query(User).filter_by(username='alice').first()
 
         assert user is not None
@@ -201,8 +202,8 @@ def test_pagination_splits_cards_between_pages(client):
     assert 'Карточка 0'.encode('utf-8') in page2.data
 
 
-def test_post_without_csrf_token_is_rejected(test_app, client):
-    test_app.config['WTF_CSRF_ENABLED'] = True
+def test_post_without_csrf_token_is_rejected(app, client):
+    app.config['WTF_CSRF_ENABLED'] = True
 
     response = client.post(
         '/register',
@@ -260,8 +261,8 @@ def test_session_cookie_has_httponly_and_samesite(client):
     assert 'SameSite=Lax' in header
 
 
-def test_session_cookie_is_secure_when_enabled(test_app, client, monkeypatch):
-    monkeypatch.setitem(test_app.config, 'SESSION_COOKIE_SECURE', True)
+def test_session_cookie_is_secure_when_enabled(app, client, monkeypatch):
+    monkeypatch.setitem(app.config, 'SESSION_COOKIE_SECURE', True)
     client.post(
         '/register',
         data={'username': 'alice', 'password': 'secret123'},
@@ -288,10 +289,10 @@ def test_logout_get_is_not_allowed(client):
     assert client.get('/').status_code == 200
 
 
-def test_logout_requires_csrf_token(test_app, client):
+def test_logout_requires_csrf_token(app, client):
     register(client)
     login(client)
-    test_app.config['WTF_CSRF_ENABLED'] = True
+    app.config['WTF_CSRF_ENABLED'] = True
 
     response = client.post('/logout/')
 

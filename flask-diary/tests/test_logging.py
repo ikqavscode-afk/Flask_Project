@@ -2,15 +2,15 @@ import logging
 
 import pytest
 
-import main
-from app_logging import configure_logging, get_log_level, safe_text
+import diary.cards.views as card_views
+from diary.logging_setup import configure_logging, get_log_level, safe_text
 
 PASSWORD = 'очень-секретный-пароль-123'
 
 
 @pytest.fixture
-def logs(caplog):
-    caplog.set_level(logging.INFO, logger=main.app.logger.name)
+def logs(caplog, app):
+    caplog.set_level(logging.INFO, logger=app.logger.name)
     return caplog
 
 
@@ -106,15 +106,15 @@ def test_log_injection_via_username_is_neutralized(client, logs):
 
 # ---------- Необработанные ошибки ----------
 
-def test_unhandled_error_is_logged_with_traceback(test_app, client, monkeypatch, logs):
+def test_unhandled_error_is_logged_with_traceback(app, client, monkeypatch, logs):
     register(client)
     login(client)
-    monkeypatch.setitem(test_app.config, 'PROPAGATE_EXCEPTIONS', False)
+    monkeypatch.setitem(app.config, 'PROPAGATE_EXCEPTIONS', False)
 
     def boom(*args, **kwargs):
         raise RuntimeError('внутренний сбой')
 
-    monkeypatch.setattr(main, 'validate_card', boom)
+    monkeypatch.setattr(card_views, 'validate_card', boom)
 
     response = client.post('/form_create', data={'title': 't', 'subtitle': '', 'text': 'x'})
 
@@ -146,19 +146,19 @@ def test_get_log_level(env, expected):
     assert get_log_level(env) == expected
 
 
-def test_flask_default_handler_is_removed():
+def test_flask_default_handler_is_removed(app):
     from flask.logging import default_handler
 
-    logger = configure_logging(main.app, 'INFO')
+    logger = configure_logging(app, 'INFO')
 
     assert default_handler not in logger.handlers
     assert len(logger.handlers) == 1
 
 
-def test_configure_logging_does_not_duplicate_handlers():
-    logger = configure_logging(main.app, 'INFO')
+def test_configure_logging_does_not_duplicate_handlers(app):
+    logger = configure_logging(app, 'INFO')
     before = len(logger.handlers)
 
-    configure_logging(main.app, 'INFO')
+    configure_logging(app, 'INFO')
 
     assert len(logger.handlers) == before

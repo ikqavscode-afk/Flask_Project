@@ -13,7 +13,7 @@
 
     <div class="header-content">
 
-        <a class="logo" href="{{ url_for('home') }}">
+        <a class="logo" href="{{ url_for('core.home') }}">
             <img class="logo-img" src="{{ url_for('static', filename='img/logo.webp') }}" alt="" width="40" height="40">
             Мой дневник
         </a>
@@ -22,15 +22,15 @@
 
             {% if current_user.is_authenticated %}
 
-                <a href="{{ url_for('index') }}">
+                <a href="{{ url_for('cards.index') }}">
                     Мои карточки
                 </a>
 
-                <a href="{{ url_for('create') }}">
+                <a href="{{ url_for('cards.create') }}">
                     Создать
                 </a>
 
-                <form class="nav-form" method="POST" action="{{ url_for('logout') }}">
+                <form class="nav-form" method="POST" action="{{ url_for('auth.logout') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="nav-logout" type="submit">Выйти</button>
                 </form>
@@ -38,12 +38,12 @@
             {% else %}
 
                 <a class="nav-button nav-button-primary"
-                   href="{{ url_for('login') }}">
+                   href="{{ url_for('auth.login') }}">
                     Войти
                 </a>
 
                 <a class="nav-button nav-button-secondary"
-                   href="{{ url_for('register') }}">
+                   href="{{ url_for('auth.register') }}">
                     Регистрация
                 </a>
 

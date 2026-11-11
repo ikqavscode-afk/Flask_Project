@@ -8,11 +8,11 @@
 
     <h1>Мои карточки</h1>
 
-    <a class="btn" href="{{ url_for('create') }}">
+    <a class="btn" href="{{ url_for('cards.create') }}">
         Создать карточку
     </a>
 
-    <form method="GET" action="{{ url_for('index') }}" class="search-form" role="search">
+    <form method="GET" action="{{ url_for('cards.index') }}" class="search-form" role="search">
         <label for="q" class="visually-hidden">Поиск по карточкам</label>
         <input
             type="text"
@@ -31,7 +31,7 @@
 
             {% for card in cards %}
 
-                <a class="diary-card" href="{{ url_for('card', id=card.id) }}">
+                <a class="diary-card" href="{{ url_for('cards.detail', id=card.id) }}">
 
                     <h3>{{ card.title }}</h3>
 
@@ -55,7 +55,7 @@
             <nav class="pagination" aria-label="Страницы">
                 {% if pagination.has_prev %}
                     <a class="btn btn-secondary"
-                       href="{{ url_for('index', page=pagination.prev_num, q=q) }}">
+                       href="{{ url_for('cards.index', page=pagination.prev_num, q=q) }}">
                         Назад
                     </a>
                 {% endif %}
@@ -64,7 +64,7 @@
 
                 {% if pagination.has_next %}
                     <a class="btn btn-secondary"
-                       href="{{ url_for('index', page=pagination.next_num, q=q) }}">
+                       href="{{ url_for('cards.index', page=pagination.next_num, q=q) }}">
                         Вперёд
                     </a>
                 {% endif %}
@@ -82,7 +82,7 @@
         <div class="empty-state">
             <p>Карточек пока нет.</p>
 
-            <a class="btn" href="{{ url_for('create') }}">
+            <a class="btn" href="{{ url_for('cards.create') }}">
                 Создать первую карточку
             </a>
         </div>

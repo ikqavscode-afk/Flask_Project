@@ -6,7 +6,7 @@ from alembic.migration import MigrationContext
 from flask_migrate import downgrade, upgrade
 from sqlalchemy import inspect, text
 
-from main import app, db
+from diary.extensions import db
 
 MIGRATIONS_DIR = str(Path(__file__).resolve().parent.parent / "migrations")
 
@@ -19,7 +19,7 @@ def _reset():
 
 
 @pytest.fixture
-def empty_db():
+def empty_db(app):
     """Пустая база: схему создаёт только миграция."""
     with app.app_context():
         _reset()
@@ -57,7 +57,7 @@ def test_downgrade_removes_schema(empty_db):
     assert "card" not in table_names()
 
 
-def test_migration_does_not_disable_application_logger(empty_db):
+def test_migration_does_not_disable_application_logger(app, empty_db):
     upgrade(directory=MIGRATIONS_DIR)
 
     assert app.logger.disabled is False

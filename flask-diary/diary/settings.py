@@ -77,3 +77,31 @@ def engine_options(url):
     if url.startswith("postgresql"):
         return {"pool_pre_ping": True}
     return {}
+
+
+# Значения по умолчанию, не зависящие от окружения
+DEFAULTS = {
+    "MAX_CONTENT_LENGTH": 64 * 1024,  # больше 64 КБ в запросе — ошибка 413
+    "CARDS_PER_PAGE": 6,
+    "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+    # Ограничение попыток входа: после LOGIN_MAX_ATTEMPTS неудач с одного адреса
+    # для одного логина (или LOGIN_MAX_ATTEMPTS_PER_IP неудач с одного адреса
+    # для любых логинов) вход блокируется до конца окна LOGIN_WINDOW_SECONDS.
+    "LOGIN_MAX_ATTEMPTS": 5,
+    "LOGIN_MAX_ATTEMPTS_PER_IP": 20,
+    "LOGIN_WINDOW_SECONDS": 300,
+}
+
+
+def load_config(env=None):
+    """Собирает настройки приложения из значений по умолчанию и переменных окружения."""
+    env = os.environ if env is None else env
+    database_url = normalize_database_url(env.get("DATABASE_URL", "sqlite:///diary.db"))
+    config = dict(DEFAULTS)
+    config.update(security_settings(env))
+    config.update(
+        SECRET_KEY=get_secret_key(env),
+        SQLALCHEMY_DATABASE_URI=database_url,
+        SQLALCHEMY_ENGINE_OPTIONS=engine_options(database_url),
+    )
+    return config

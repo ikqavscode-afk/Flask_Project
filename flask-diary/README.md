@@ -49,34 +49,32 @@ Python 3, Flask, Flask-Login, Flask-SQLAlchemy, Flask-Migrate, Flask-WTF, SQLite
 
 ## Структура
 
+Приложение собрано по функциям: раздел (страницы, правила, логика) — это отдельный пакет. Подробности и инструкции по расширению — в [руководстве по архитектуре](../docs/architecture.md).
+
 ```
 flask-diary/
-├── main.py             # приложение, модели, маршруты
-├── config.py           # настройки окружения (ключ, cookie)
-├── validation.py       # проверка вводимых данных
-├── app_logging.py      # настройка журнала
-├── migrations/         # миграции базы данных
+├── main.py                 # точка входа: gunicorn main:app, flask --app main
+├── diary/
+│   ├── __init__.py         # create_app(): фабрика приложения, список разделов
+│   ├── extensions.py       # db, migrate, csrf, login_manager
+│   ├── settings.py         # настройки из окружения
+│   ├── logging_setup.py    # журнал
+│   ├── models/             # модели: user.py, card.py, login_attempt.py
+│   ├── core/               # главная, /health, страницы ошибок
+│   ├── auth/               # регистрация, вход, выход, ограничение попыток
+│   │   ├── views.py        # маршруты (тонкие)
+│   │   ├── services.py     # логика
+│   │   └── validation.py   # проверка данных
+│   ├── cards/              # карточки: views.py, services.py, validation.py
+│   ├── templates/          # base.html и папки auth, cards, core, errors
+│   └── static/             # css, img
+├── migrations/             # миграции базы данных
+├── tests/                  # тесты (фикстуры app и client в conftest.py)
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
 ├── pytest.ini
-├── .env.example        # пример переменных окружения
-├── static/
-│   ├── css/index.css
-│   └── img/
-├── templates/
-│   ├── base.html
-│   ├── home.html
-│   ├── index.html      # список, поиск, пагинация
-│   ├── login.html
-│   ├── register.html
-│   ├── create.html
-│   ├── edit.html
-│   ├── error.html      # страницы ошибок
-│   └── card.html
-└── tests/
-    ├── conftest.py
-    └── test_auth.py
+└── .env.example            # пример переменных окружения
 ```
 
 ## Маршруты
@@ -172,10 +170,10 @@ docker compose up --build
 ```bash
 pip install pytest pytest-cov
 pytest -q
-pytest --cov=main --cov-report=term-missing
+pytest --cov=diary --cov-report=term-missing
 ```
 
-Тесты используют базу в памяти (адрес задаётся переменной `DATABASE_URL` в `tests/conftest.py`, рабочая база не затрагивается) и проверяют: регистрацию и вход, защиту страниц, изоляцию карточек между пользователями, создание, редактирование и удаление, поиск, пагинацию и отклонение запросов без CSRF-токена. Покрытие `main.py` — около 99%.
+Каждый тест получает своё приложение из фабрики `create_app()` и базу в памяти (рабочая база не затрагивается) и проверяют: регистрацию и вход, защиту страниц, изоляцию карточек между пользователями, создание, редактирование и удаление, поиск, пагинацию и отклонение запросов без CSRF-токена. Покрытие пакета `diary` — около 99%.
 
 ## Журнал
 

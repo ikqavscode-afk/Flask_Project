@@ -2,8 +2,9 @@ from datetime import timedelta
 
 import pytest
 
-import main
-from main import LoginAttempt, db
+from diary.auth import services
+from diary.extensions import db
+from diary.models import LoginAttempt
 
 
 def register(client, username='alice', password='secret123'):
@@ -116,34 +117,34 @@ def test_successful_login_resets_the_counter(client):
     assert attempt(client).status_code == 302  # пятая неудача после сброса, ещё не блокировка
 
 
-def test_block_expires_after_the_window(client, monkeypatch):
+def test_block_expires_after_the_window(app, client, monkeypatch):
     register(client)
     fail_times(client, 5)
     assert attempt(client).status_code == 429
 
-    later = main.utcnow() + timedelta(seconds=main.app.config['LOGIN_WINDOW_SECONDS'] + 1)
-    monkeypatch.setattr(main, 'utcnow', lambda: later)
+    later = services.utcnow() + timedelta(seconds=app.config['LOGIN_WINDOW_SECONDS'] + 1)
+    monkeypatch.setattr(services, 'utcnow', lambda: later)
 
     assert attempt(client, password='secret123').status_code == 302
 
 
-def test_old_attempts_are_cleaned_up(client, monkeypatch):
+def test_old_attempts_are_cleaned_up(app, client, monkeypatch):
     register(client)
     fail_times(client, 3)
     assert count_attempts() == 6  # по две записи на попытку (адрес и пара)
 
-    later = main.utcnow() + timedelta(seconds=main.app.config['LOGIN_WINDOW_SECONDS'] + 1)
-    monkeypatch.setattr(main, 'utcnow', lambda: later)
+    later = services.utcnow() + timedelta(seconds=app.config['LOGIN_WINDOW_SECONDS'] + 1)
+    monkeypatch.setattr(services, 'utcnow', lambda: later)
     attempt(client)
 
     assert count_attempts() == 2  # остались только записи последней попытки
 
 
-def test_blocked_attempt_is_logged(client, caplog):
+def test_blocked_attempt_is_logged(app, client, caplog):
     register(client)
     fail_times(client, 5)
 
-    with caplog.at_level('WARNING', logger=main.app.logger.name):
+    with caplog.at_level('WARNING', logger=app.logger.name):
         attempt(client)
 
     assert any('login blocked' in r.getMessage() for r in caplog.records)
@@ -158,7 +159,7 @@ def test_blocked_page_never_shows_password(client):
     assert 'мой-секретный-пароль' not in response.get_data(as_text=True)
 
 
-def test_username_in_key_is_bounded_and_case_insensitive(client):
+def test_username_in_key_is_bounded_and_case_insensitive(app, client):
     register(client)
     for name in ('Alice', 'ALICE', 'alice', 'aLiCe', 'AlIcE'):
         attempt(client, username=name)
@@ -166,14 +167,14 @@ def test_username_in_key_is_bounded_and_case_insensitive(client):
     assert attempt(client, username='alice').status_code == 429
     long_name = 'я' * 5000
     attempt(client, username=long_name)  # не должно падать из-за длины ключа
-    with main.app.app_context():
+    with app.app_context():
         longest = max(len(row.key) for row in LoginAttempt.query.all())
     assert longest < 255
 
 
 @pytest.mark.parametrize('retry, minutes', [(1, 1), (60, 1), (61, 2), (300, 5)])
 def test_message_rounds_minutes_up(client, monkeypatch, retry, minutes):
-    monkeypatch.setattr(main, 'login_retry_after', lambda ip, username: retry)
+    monkeypatch.setattr(services, 'login_retry_after', lambda ip, username: retry)
 
     response = attempt(client)
 
