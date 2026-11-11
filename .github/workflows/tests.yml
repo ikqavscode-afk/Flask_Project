@@ -5,6 +5,20 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff==0.17.4
+      - name: Lint
+        run: ruff check .
+      - name: Check formatting
+        run: ruff format --check .
+
   flask-apps:
     runs-on: ubuntu-latest
     strategy:
@@ -25,8 +39,12 @@ jobs:
           cache: pip
           cache-dependency-path: ${{ matrix.project }}/requirements.txt
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest
-      - name: Run tests
+        run: pip install -r requirements.txt -r ../requirements-dev.txt
+      - name: Run tests with coverage (diary)
+        if: matrix.project == 'flask-diary'
+        run: pytest -q --cov=diary --cov-fail-under=95
+      - name: Run tests (blog)
+        if: matrix.project == 'flask-notes-blog'
         run: pytest -q
 
   diary-postgres:
@@ -58,9 +76,9 @@ jobs:
           cache: pip
           cache-dependency-path: flask-diary/requirements.txt
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest
+        run: pip install -r requirements.txt -r ../requirements-dev.txt
       - name: Run tests on PostgreSQL
-        run: pytest -q
+        run: pytest -q --cov=diary --cov-fail-under=95
 
   cli-shop:
     runs-on: ubuntu-latest
@@ -77,9 +95,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install pytest
-        run: pip install pytest
-      - name: Run tests
-        run: pytest -q
+        run: pip install -r ../requirements-dev.txt
+      - name: Run tests with coverage
+        run: pytest -q --cov=shop --cov-fail-under=90
       - name: Run app (exit from menu)
         run: printf '1\n0\n' | python main.py
 
@@ -98,9 +116,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install pytest
-        run: pip install pytest
-      - name: Run tests
-        run: pytest -q
+        run: pip install -r ../requirements-dev.txt
+      - name: Run tests with coverage
+        run: pytest -q --cov=dp --cov-fail-under=95
       - name: Run demo
         run: python demo.py
 

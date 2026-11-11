@@ -1,4 +1,5 @@
 """Общие страницы: главная и проверка работоспособности."""
+
 from flask import Blueprint, jsonify, render_template
 from sqlalchemy import text
 

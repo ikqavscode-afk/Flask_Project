@@ -35,8 +35,8 @@ algorithms-dp/
 from dp import knapsack_with_items, lcs, edit_distance
 
 knapsack_with_items(50, [10, 20, 30], [60, 100, 120])  # (220, [1, 2])
-lcs("AGGTAB", "GXTXAYB")                                # "GTAB"
-edit_distance("kitten", "sitting")                      # 3
+lcs("AGGTAB", "GXTXAYB")  # "GTAB"
+edit_distance("kitten", "sitting")  # 3
 ```
 
 ## Запуск демонстрации

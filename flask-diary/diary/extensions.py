@@ -1,4 +1,5 @@
 """Расширения Flask. Создаются один раз, подключаются к приложению в create_app()."""
+
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy

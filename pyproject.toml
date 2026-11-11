@@ -1,0 +1,45 @@
+# Настройки инструментов для всего репозитория (линтер и форматирование).
+# Запуск:  ruff check .   и   ruff format .
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# Папки проектов, чтобы импорты diary, shop, dp считались «своими»
+src = ["flask-diary", "cli-shop", "algorithms-dp", "flask-notes-blog"]
+# Миграции создаются Alembic автоматически, их не форматируем
+extend-exclude = ["migrations", "_zips"]
+
+[tool.ruff.format]
+# Не переписываем кавычки: в проектах исторически смешаны ' и "
+quote-style = "preserve"
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # стиль pycodestyle
+    "F",        # ошибки pyflakes: неиспользуемое и неопределённое
+    "I",        # порядок импортов
+    "B",        # вероятные ошибки (flake8-bugbear)
+    "UP",       # современный синтаксис Python
+    "SIM",      # упрощение кода
+    "C4",       # генераторы и включения
+    "C90",      # сложность функций
+    "PL",       # pylint
+    "PT",       # pytest
+    "RUF",      # правила ruff
+]
+ignore = [
+    # Кириллица в строках, комментариях и docstring не ошибка
+    "RUF001", "RUF002", "RUF003",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.lint.per-file-ignores]
+# В тестах числа вроде кодов ответа 404 читаются лучше, чем константы
+"**/tests/**" = ["PLR2004"]
+"**/test_*.py" = ["PLR2004"]
+# Импорты внутри create_app нужны, чтобы избежать циклических импортов
+"flask-diary/diary/__init__.py" = ["PLC0415"]
+# Меню магазина слишком сложное (11 > 8): будет упрощено в шаге R4, тогда исключение снимем
+"cli-shop/shop/cli.py" = ["C901"]

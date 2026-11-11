@@ -25,10 +25,7 @@ def floyd_warshall_paths(adj_matrix):
     """
     n = len(adj_matrix)
     dist = [row[:] for row in adj_matrix]
-    nxt = [
-        [j if i != j and dist[i][j] != INF else None for j in range(n)]
-        for i in range(n)
-    ]
+    nxt = [[j if i != j and dist[i][j] != INF else None for j in range(n)] for i in range(n)]
     for k in range(n):
         for i in range(n):
             for j in range(n):

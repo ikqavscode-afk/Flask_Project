@@ -1,4 +1,5 @@
 """Демонстрация: python demo.py"""
+
 from dp import (
     INF,
     count_coin_ways,

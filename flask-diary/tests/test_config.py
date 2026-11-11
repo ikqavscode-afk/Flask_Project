@@ -36,7 +36,7 @@ def test_production_rejects_missing_or_weak_key(env):
 
 
 @pytest.mark.parametrize(
-    "env, expected",
+    ("env", "expected"),
     [({}, False), ({"APP_ENV": "development"}, False), ({"APP_ENV": "production"}, True)],
 )
 def test_is_production(env, expected):
@@ -67,7 +67,7 @@ from diary.settings import engine_options, normalize_database_url  # noqa: E402
 
 
 @pytest.mark.parametrize(
-    "url, expected",
+    ("url", "expected"),
     [
         ("postgres://u:p@host:5432/db", "postgresql+psycopg://u:p@host:5432/db"),
         ("postgresql://u:p@host/db", "postgresql+psycopg://u:p@host/db"),

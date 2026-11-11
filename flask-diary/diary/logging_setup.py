@@ -3,6 +3,7 @@
 Журнал пишется в стандартный вывод (так его собирают хостинги и Docker).
 В него не попадают пароли, токены и содержимое карточек.
 """
+
 import logging
 import re
 import sys
@@ -38,9 +39,7 @@ def configure_logging(app, level="INFO"):
     logger.handlers = [h for h in logger.handlers if not getattr(h, "_diary", False)]
     handler = logging.StreamHandler(sys.stdout)
     handler._diary = True
-    handler.setFormatter(
-        logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
-    )
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
     logger.addHandler(handler)
     logger.setLevel(level)
     return logger

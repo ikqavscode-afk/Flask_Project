@@ -37,7 +37,7 @@ def test_sort_does_not_modify_input(sort_func):
 
     sort_func(PRODUCTS, SortAlgorithms._key_func("price"))
 
-    assert PRODUCTS == original
+    assert original == PRODUCTS
 
 
 @pytest.mark.parametrize("sort_func", ALGORITHMS, ids=ALGORITHM_IDS)

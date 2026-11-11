@@ -1,6 +1,7 @@
 """Бизнес-логика аутентификации. Не зависит от запросов и шаблонов."""
+
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from flask import current_app
 
@@ -10,10 +11,11 @@ from ..models import LoginAttempt, User
 
 
 def utcnow():
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 # ---------- пользователи ----------
+
 
 def get_user(user_id):
     return db.session.get(User, user_id)
@@ -32,6 +34,7 @@ def create_user(username, password):
 
 
 # ---------- ограничение попыток входа ----------
+
 
 def _login_keys(ip, username):
     """Ключи счётчиков: общий по адресу и по паре «адрес + логин».
@@ -58,7 +61,8 @@ def login_retry_after(ip, username):
     retry_after = 0
     for key, limit in limits:
         times = [
-            row[0] for row in db.session.query(LoginAttempt.created_at)
+            row[0]
+            for row in db.session.query(LoginAttempt.created_at)
             .filter(LoginAttempt.key == key, LoginAttempt.created_at >= now - window)
             .order_by(LoginAttempt.created_at)
             .all()

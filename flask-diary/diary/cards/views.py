@@ -1,6 +1,13 @@
 """Страницы карточек: список, просмотр, создание, редактирование, удаление."""
+
 from flask import (
-    Blueprint, current_app, flash, redirect, render_template, request, url_for,
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
 )
 from flask_login import current_user, login_required
 
@@ -31,9 +38,7 @@ def index():
     pagination = services.search_cards(
         current_user.id, q, page, current_app.config['CARDS_PER_PAGE']
     )
-    return render_template(
-        'cards/index.html', cards=pagination.items, pagination=pagination, q=q
-    )
+    return render_template('cards/index.html', cards=pagination.items, pagination=pagination, q=q)
 
 
 @bp.route('/card/<int:id>')

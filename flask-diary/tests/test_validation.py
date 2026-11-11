@@ -5,11 +5,11 @@ from diary.cards.validation import validate_card
 from diary.extensions import db
 from diary.models import Card, User
 
-
 # ---------- Логин ----------
 
+
 @pytest.mark.parametrize(
-    "raw, expected",
+    ("raw", "expected"),
     [
         ("alice", "alice"),
         ("  alice  ", "alice"),
@@ -38,6 +38,7 @@ def test_username_invalid(raw):
 
 # ---------- Пароль ----------
 
+
 @pytest.mark.parametrize("raw", ["12345678", "a" * 128, " pass word ", "Пароль-123"])
 def test_password_valid(raw):
     assert validate_password(raw) is None
@@ -49,6 +50,7 @@ def test_password_invalid(raw):
 
 
 # ---------- Карточка ----------
+
 
 def test_card_valid_is_trimmed():
     data, errors = validate_card("  Заголовок ", " под ", "  текст\n")
@@ -65,7 +67,7 @@ def test_card_subtitle_is_optional():
 
 
 @pytest.mark.parametrize(
-    "title, subtitle, text, fragment",
+    ("title", "subtitle", "text", "fragment"),
     [
         ("", "", "x", "Заголовок не может быть пустым"),
         ("   ", "", "x", "Заголовок не может быть пустым"),
@@ -95,6 +97,7 @@ def test_card_collects_all_errors():
 
 
 # ---------- Через формы ----------
+
 
 def register(client, username='alice', password='secret123'):
     return client.post(
@@ -198,9 +201,7 @@ def test_create_whitespace_only_fields_are_rejected(app, client):
     register(client)
     login(client)
 
-    response = client.post(
-        '/form_create', data={'title': '   ', 'subtitle': '', 'text': '   '}
-    )
+    response = client.post('/form_create', data={'title': '   ', 'subtitle': '', 'text': '   '})
 
     assert response.status_code == 400
     assert count_cards(app) == 0

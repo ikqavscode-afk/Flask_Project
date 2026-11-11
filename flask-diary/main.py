@@ -1,4 +1,5 @@
 """Точка входа: gunicorn main:app, flask --app main ..., python main.py."""
+
 import os
 
 from diary import create_app

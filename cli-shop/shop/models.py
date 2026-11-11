@@ -15,7 +15,7 @@ class Product:
             f"{self.category:<12} | "
             f"{self.price:>10.2f} руб. | "
             f"{self.weight:>5.2f} кг"
-    )
+        )
 
     def to_dict(self):
         return {
@@ -23,12 +23,13 @@ class Product:
             "category": self.category,
             "price": self.price,
             "weight": self.weight,
-            "description": self.description
+            "description": self.description,
         }
 
 
 class Catalog:
     """Каталог товаров (хранилище)"""
+
     def __init__(self):
         self.products = []
 

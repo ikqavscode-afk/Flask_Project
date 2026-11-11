@@ -78,7 +78,7 @@ def test_cart_totals(apple, book):
     assert cart.total_weight() == pytest.approx(0.7)
 
 
-@pytest.mark.parametrize("index, removed", [(0, True), (1, True), (2, False), (-1, False)])
+@pytest.mark.parametrize(("index", "removed"), [(0, True), (1, True), (2, False), (-1, False)])
 def test_cart_remove_item_by_index(apple, book, index, removed):
     cart = Cart()
     cart.add_item(apple)

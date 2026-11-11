@@ -63,6 +63,7 @@
        db.Column('tag_id', db.ForeignKey('tag.id', ondelete='CASCADE'), primary_key=True),
    )
 
+
    class Tag(db.Model):
        __tablename__ = 'tag'
        __table_args__ = (db.UniqueConstraint('user_id', 'name'),)

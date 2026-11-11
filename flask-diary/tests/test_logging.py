@@ -1,6 +1,7 @@
 import logging
 
 import pytest
+from flask.logging import default_handler
 
 import diary.cards.views as card_views
 from diary.logging_setup import configure_logging, get_log_level, safe_text
@@ -36,6 +37,7 @@ def messages(logs):
 
 # ---------- События ----------
 
+
 def test_register_and_login_are_logged(client, logs):
     register(client)
     login(client)
@@ -67,8 +69,12 @@ def test_card_changes_are_logged_without_content(client, logs):
     register(client)
     login(client)
 
-    client.post('/form_create', data={'title': 'Личный заголовок', 'subtitle': '', 'text': 'Личный текст'})
-    client.post('/card/1/edit', data={'title': 'Новый заголовок', 'subtitle': '', 'text': 'Новый текст'})
+    client.post(
+        '/form_create', data={'title': 'Личный заголовок', 'subtitle': '', 'text': 'Личный текст'}
+    )
+    client.post(
+        '/card/1/edit', data={'title': 'Новый заголовок', 'subtitle': '', 'text': 'Новый текст'}
+    )
     client.post('/card/1/delete')
 
     text = '\n'.join(messages(logs))
@@ -80,6 +86,7 @@ def test_card_changes_are_logged_without_content(client, logs):
 
 
 # ---------- Что в журнал попадать не должно ----------
+
 
 def test_passwords_never_appear_in_logs(client, logs):
     register(client)
@@ -106,6 +113,7 @@ def test_log_injection_via_username_is_neutralized(client, logs):
 
 # ---------- Необработанные ошибки ----------
 
+
 def test_unhandled_error_is_logged_with_traceback(app, client, monkeypatch, logs):
     register(client)
     login(client)
@@ -127,6 +135,7 @@ def test_unhandled_error_is_logged_with_traceback(app, client, monkeypatch, logs
 
 # ---------- Вспомогательные функции ----------
 
+
 def test_safe_text_removes_control_characters():
     assert safe_text('a\nb\r\tc\x00d') == 'a b  c d'
 
@@ -138,17 +147,20 @@ def test_safe_text_truncates_long_values():
 
 
 @pytest.mark.parametrize(
-    'env, expected',
-    [({}, 'INFO'), ({'LOG_LEVEL': 'debug'}, 'DEBUG'), ({'LOG_LEVEL': 'ERROR'}, 'ERROR'),
-     ({'LOG_LEVEL': 'болтовня'}, 'INFO'), ({'LOG_LEVEL': ''}, 'INFO')],
+    ('env', 'expected'),
+    [
+        ({}, 'INFO'),
+        ({'LOG_LEVEL': 'debug'}, 'DEBUG'),
+        ({'LOG_LEVEL': 'ERROR'}, 'ERROR'),
+        ({'LOG_LEVEL': 'болтовня'}, 'INFO'),
+        ({'LOG_LEVEL': ''}, 'INFO'),
+    ],
 )
 def test_get_log_level(env, expected):
     assert get_log_level(env) == expected
 
 
 def test_flask_default_handler_is_removed(app):
-    from flask.logging import default_handler
-
     logger = configure_logging(app, 'INFO')
 
     assert default_handler not in logger.handlers

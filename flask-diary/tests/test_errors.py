@@ -2,15 +2,18 @@ import pytest
 from sqlalchemy.orm import Session
 
 import diary.cards.views as card_views
-from diary.extensions import db
 
 
 def register(client, username='alice', password='secret123'):
-    return client.post('/register', data={'username': username, 'password': password}, follow_redirects=True)
+    return client.post(
+        '/register', data={'username': username, 'password': password}, follow_redirects=True
+    )
 
 
 def login(client, username='alice', password='secret123'):
-    return client.post('/login/', data={'username': username, 'password': password}, follow_redirects=True)
+    return client.post(
+        '/login/', data={'username': username, 'password': password}, follow_redirects=True
+    )
 
 
 def html(response):
@@ -59,7 +62,9 @@ def test_413_page(client):
     register(client)
     login(client)
 
-    response = client.post('/form_create', data={'title': 't', 'subtitle': '', 'text': 'x' * (70 * 1024)})
+    response = client.post(
+        '/form_create', data={'title': 't', 'subtitle': '', 'text': 'x' * (70 * 1024)}
+    )
 
     assert response.status_code == 413
     assert 'Слишком большой запрос' in html(response)

@@ -17,8 +17,8 @@ def edit_distance(s1, s2):
         for j, c2 in enumerate(s2, start=1):
             current.append(
                 min(
-                    previous[j] + 1,            # удаление
-                    current[j - 1] + 1,         # вставка
+                    previous[j] + 1,  # удаление
+                    current[j - 1] + 1,  # вставка
                     previous[j - 1] + (c1 != c2),  # замена
                 )
             )

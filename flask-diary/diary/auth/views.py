@@ -1,9 +1,16 @@
 """Страницы регистрации, входа и выхода."""
+
 import math
 
 from flask import (
-    Blueprint, current_app, flash, make_response, redirect,
-    render_template, request, url_for,
+    Blueprint,
+    current_app,
+    flash,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
 
@@ -61,7 +68,9 @@ def login():
         if retry_after:
             current_app.logger.warning(
                 'login blocked username=%r ip=%s retry_after=%ss',
-                safe_text(username or ''), ip, retry_after,
+                safe_text(username or ''),
+                ip,
+                retry_after,
             )
             minutes = max(1, math.ceil(retry_after / 60))
             body, code = render_error(
@@ -82,7 +91,9 @@ def login():
 
         services.record_failed_login(ip, username)
         current_app.logger.warning(
-            'login failed username=%r ip=%s', safe_text(username or ''), ip,
+            'login failed username=%r ip=%s',
+            safe_text(username or ''),
+            ip,
         )
         flash('Неверный логин или пароль', 'error')
         return redirect(url_for('auth.login'))

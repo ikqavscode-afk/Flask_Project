@@ -1,4 +1,5 @@
 """Настройки приложения, зависящие от окружения."""
+
 import os
 
 DEV_SECRET_KEY = "dev-secret-key"
@@ -25,9 +26,7 @@ def get_secret_key(env=None):
         return key or DEV_SECRET_KEY
 
     if not key:
-        raise RuntimeError(
-            "SECRET_KEY не задан. В режиме production переменная обязательна."
-        )
+        raise RuntimeError("SECRET_KEY не задан. В режиме production переменная обязательна.")
     if key == DEV_SECRET_KEY or len(key) < MIN_SECRET_KEY_LENGTH:
         raise RuntimeError(
             "SECRET_KEY слишком слабый: используйте случайную строку "
@@ -62,9 +61,9 @@ def normalize_database_url(url):
     не принимает первый вариант и для второго ожидает драйвер psycopg2.
     """
     if url.startswith("postgres://"):
-        return "postgresql+psycopg://" + url[len("postgres://"):]
+        return "postgresql+psycopg://" + url[len("postgres://") :]
     if url.startswith("postgresql://"):
-        return "postgresql+psycopg://" + url[len("postgresql://"):]
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
     return url
 
 

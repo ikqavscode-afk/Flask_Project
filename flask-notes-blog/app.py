@@ -1,14 +1,17 @@
 import os
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-from flask_sqlalchemy import SQLAlchemy
+
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_migrate import Migrate
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
 from itsdangerous import URLSafeTimedSerializer
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///notes.db")
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")  # нужен для session и токенов
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY", "dev-secret-key"
+)  # нужен для session и токенов
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -40,12 +43,14 @@ class User(db.Model):
 
 def login_required(view):
     """Пускает дальше только вошедших пользователей."""
+
     @wraps(view)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
             flash("Войдите, чтобы увидеть заметки")
             return redirect(url_for("login"))
         return view(*args, **kwargs)
+
     return wrapped
 
 

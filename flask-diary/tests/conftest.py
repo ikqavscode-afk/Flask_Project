@@ -4,6 +4,7 @@
 задайте TEST_DATABASE_URL (например, в CI). Каждый тест получает своё
 приложение, созданное фабрикой, поэтому тесты не влияют друг на друга.
 """
+
 import os
 
 import pytest
@@ -19,13 +20,15 @@ TEST_DATABASE_URL = normalize_database_url(
 
 @pytest.fixture
 def app():
-    app = create_app({
-        'TESTING': True,
-        'WTF_CSRF_ENABLED': False,
-        'SECRET_KEY': 'test-secret-key',
-        'SQLALCHEMY_DATABASE_URI': TEST_DATABASE_URL,
-        'SQLALCHEMY_ENGINE_OPTIONS': engine_options(TEST_DATABASE_URL),
-    })
+    app = create_app(
+        {
+            'TESTING': True,
+            'WTF_CSRF_ENABLED': False,
+            'SECRET_KEY': 'test-secret-key',
+            'SQLALCHEMY_DATABASE_URI': TEST_DATABASE_URL,
+            'SQLALCHEMY_ENGINE_OPTIONS': engine_options(TEST_DATABASE_URL),
+        }
+    )
 
     with app.app_context():
         db.create_all()

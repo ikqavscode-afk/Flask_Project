@@ -19,7 +19,7 @@ def knapsack(capacity, weights, values):
     """
     _check(capacity, weights, values)
     dp = [0] * (capacity + 1)
-    for weight, value in zip(weights, values):
+    for weight, value in zip(weights, values, strict=True):
         for w in range(capacity, weight - 1, -1):
             dp[w] = max(dp[w], dp[w - weight] + value)
     return dp[capacity]

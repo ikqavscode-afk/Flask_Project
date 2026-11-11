@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from shop.cli import ShopApp
@@ -43,7 +41,7 @@ def test_load_invalid_file_raises_value_error(tmp_path, content):
     path = tmp_path / "bad.json"
     path.write_text(content, encoding="utf-8")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Некорректный файл каталога"):
         load_catalog(path)
 
 
@@ -86,7 +84,7 @@ def test_removed_product_stays_removed(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "answers, message",
+    ("answers", "message"),
     [
         (["", "Еда"], "обязательны"),
         (["Чай", "Еда", "abc", "1"], "числами"),

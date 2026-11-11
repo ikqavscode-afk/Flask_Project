@@ -8,7 +8,9 @@ from diary.models import LoginAttempt
 
 
 def register(client, username='alice', password='secret123'):
-    return client.post('/register', data={'username': username, 'password': password}, follow_redirects=True)
+    return client.post(
+        '/register', data={'username': username, 'password': password}, follow_redirects=True
+    )
 
 
 def attempt(client, username='alice', password='неверный-пароль', ip='10.0.0.1'):
@@ -172,7 +174,7 @@ def test_username_in_key_is_bounded_and_case_insensitive(app, client):
     assert longest < 255
 
 
-@pytest.mark.parametrize('retry, minutes', [(1, 1), (60, 1), (61, 2), (300, 5)])
+@pytest.mark.parametrize(('retry', 'minutes'), [(1, 1), (60, 1), (61, 2), (300, 5)])
 def test_message_rounds_minutes_up(client, monkeypatch, retry, minutes):
     monkeypatch.setattr(services, 'login_retry_after', lambda ip, username: retry)
 

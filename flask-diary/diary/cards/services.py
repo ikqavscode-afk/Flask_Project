@@ -1,4 +1,5 @@
 """Бизнес-логика карточек. Не зависит от запросов и шаблонов."""
+
 from ..extensions import db
 from ..models import Card
 
@@ -9,13 +10,9 @@ def search_cards(user_id, query_text, page, per_page):
     if query_text:
         pattern = f'%{query_text}%'
         query = query.filter(
-            Card.title.ilike(pattern)
-            | Card.subtitle.ilike(pattern)
-            | Card.text.ilike(pattern)
+            Card.title.ilike(pattern) | Card.subtitle.ilike(pattern) | Card.text.ilike(pattern)
         )
-    return query.order_by(Card.id.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
+    return query.order_by(Card.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
 
 def get_user_card_or_404(card_id, user_id):

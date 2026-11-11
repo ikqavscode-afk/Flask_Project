@@ -18,11 +18,11 @@ from dp import (
     restore_path,
 )
 
-
 # ---------- Рюкзак ----------
 
+
 @pytest.mark.parametrize(
-    "capacity, weights, values, expected",
+    ("capacity", "weights", "values", "expected"),
     [
         (5, [2, 3, 4, 5], [3, 4, 5, 6], 7),
         (50, [10, 20, 30], [60, 100, 120], 220),
@@ -70,16 +70,17 @@ def test_knapsack_matches_brute_force_on_random_inputs():
 
 
 def test_knapsack_validation():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="одной длины"):
         knapsack(5, [1, 2], [1])
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="capacity не может быть отрицательной"):
         knapsack(-1, [1], [1])
 
 
 # ---------- LCS ----------
 
+
 @pytest.mark.parametrize(
-    "s1, s2, length, sequence",
+    ("s1", "s2", "length", "sequence"),
     [
         ("ABCDGH", "AEDFHR", 3, "ADH"),
         ("AGGTAB", "GXTXAYB", 4, "GTAB"),
@@ -114,8 +115,9 @@ def test_lcs_result_is_common_subsequence_of_right_length():
 
 # ---------- Разбиения числа ----------
 
+
 @pytest.mark.parametrize(
-    "n, expected",
+    ("n", "expected"),
     [(0, 1), (1, 1), (2, 2), (3, 3), (4, 5), (5, 7), (6, 11), (10, 42), (50, 204226)],
 )
 def test_count_partition(n, expected):
@@ -123,7 +125,7 @@ def test_count_partition(n, expected):
 
 
 def test_count_partition_negative():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="не может быть отрицательным"):
         count_partition(-1)
 
 
@@ -151,7 +153,7 @@ def test_floyd_warshall_does_not_modify_input():
 
     floyd_warshall(GRAPH)
 
-    assert GRAPH == before
+    assert before == GRAPH
 
 
 def test_restore_path():
@@ -174,8 +176,9 @@ def test_floyd_warshall_finds_shorter_indirect_route():
 
 # ---------- Размен монет ----------
 
+
 @pytest.mark.parametrize(
-    "coins, amount, expected",
+    ("coins", "amount", "expected"),
     [
         ([1, 2, 5], 11, 3),
         ([2], 3, -1),
@@ -190,7 +193,7 @@ def test_min_coins(coins, amount, expected):
 
 
 @pytest.mark.parametrize(
-    "coins, amount, expected",
+    ("coins", "amount", "expected"),
     [
         ([1, 2, 5], 5, 4),
         ([2], 3, 0),
@@ -215,16 +218,17 @@ def test_count_coin_ways_ignores_non_positive_coins():
 
 
 def test_coins_negative_amount():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="amount не может быть отрицательной"):
         min_coins([1], -1)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="amount не может быть отрицательной"):
         count_coin_ways([1], -1)
 
 
 # ---------- Редакционное расстояние ----------
 
+
 @pytest.mark.parametrize(
-    "s1, s2, expected",
+    ("s1", "s2", "expected"),
     [
         ("kitten", "sitting", 3),
         ("flaw", "lawn", 2),

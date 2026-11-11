@@ -1,5 +1,6 @@
 import pytest
-from app import app, db, User
+
+from app import User, app, db
 
 
 @pytest.fixture
@@ -135,7 +136,7 @@ def test_token_is_generated_on_login(client):
     with client.session_transaction() as sess:
         assert "token" in sess
         assert sess["token"] is not None
-        
+
 
 def register_and_login(client, username, email):
     client.post(
@@ -168,9 +169,7 @@ def test_notes_require_login(client):
 
 def test_notes_post_requires_login(client):
     """Без входа нельзя создать заметку."""
-    response = client.post(
-        "/notes", data={"title": "t", "subtitle": "", "text": "x"}
-    )
+    response = client.post("/notes", data={"title": "t", "subtitle": "", "text": "x"})
 
     assert response.status_code == 302
     assert "/login" in response.headers["Location"]
@@ -181,7 +180,7 @@ def test_user_can_create_and_see_own_note(client):
 
     response = add_note(client, "Моя заметка")
 
-    assert "Моя заметка".encode("utf-8") in response.data
+    assert "Моя заметка".encode() in response.data
 
 
 def test_user_does_not_see_foreign_notes(client):
@@ -192,7 +191,7 @@ def test_user_does_not_see_foreign_notes(client):
     register_and_login(client, "bob", "bob@example.com")
     response = client.get("/notes")
 
-    assert "Секрет Алисы".encode("utf-8") not in response.data
+    assert "Секрет Алисы".encode() not in response.data
 
 
 def test_logout_closes_access_to_notes(client):

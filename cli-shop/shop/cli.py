@@ -1,4 +1,5 @@
 """Консольный интерфейс магазина."""
+
 import copy
 from pathlib import Path
 
@@ -50,7 +51,7 @@ class ShopApp:
         print("\n======================== КАТАЛОГ ТОВАРОВ ========================")
         print("=================================================================")
         for i, p in enumerate(self.catalog.get_list()):
-            print(f"{i+1}. {p}")
+            print(f"{i + 1}. {p}")
         print("=================================================================\n")
 
     def add_product_to_catalog(self):
@@ -134,7 +135,7 @@ class ShopApp:
         sort_func = alg_map.get(alg_choice, SortAlgorithms.bubble_sort)
 
         order = input("Порядок: 1 - по возрастанию, 2 - по убыванию: ")
-        reverse = (order == "2")
+        reverse = order == "2"
 
         show_steps = input("Показывать шаги? (y/n): ").lower() == "y"
 
@@ -154,9 +155,9 @@ class ShopApp:
 
     def run(self):
         while True:
-            print("\n" + "="*40)
+            print("\n" + "=" * 40)
             print("********** СИМУЛЯТОР МАГАЗИНА **********")
-            print("="*40)
+            print("=" * 40)
             print("1. Показать каталог")
             print("2. Добавить товар в корзину")
             print("3. Удалить товар из корзины")

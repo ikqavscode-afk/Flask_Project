@@ -1,4 +1,5 @@
 """Классические задачи динамического программирования."""
+
 from .coins import count_coin_ways, min_coins
 from .edit_distance import edit_distance
 from .floyd_warshall import INF, floyd_warshall, floyd_warshall_paths, restore_path

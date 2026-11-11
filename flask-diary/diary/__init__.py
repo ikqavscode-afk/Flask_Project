@@ -3,6 +3,7 @@
 Как добавить новый раздел: создайте пакет с блюпринтом (по образцу ``cards``)
 и добавьте его в ``_blueprints()``. Подробности: docs/architecture.md.
 """
+
 import os
 
 from flask import Flask

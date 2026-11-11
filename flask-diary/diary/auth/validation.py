@@ -1,4 +1,5 @@
 """Проверка данных регистрации: логин и пароль."""
+
 import re
 
 USERNAME_MIN, USERNAME_MAX = 3, 50
@@ -13,10 +14,7 @@ def validate_username(raw):
     if not USERNAME_MIN <= len(username) <= USERNAME_MAX:
         return username, f"Логин: от {USERNAME_MIN} до {USERNAME_MAX} символов"
     if not _USERNAME_RE.match(username):
-        return username, (
-            "Логин может содержать только буквы, цифры, "
-            "точку, дефис и подчёркивание"
-        )
+        return username, ("Логин может содержать только буквы, цифры, точку, дефис и подчёркивание")
     return username, None
 
 
