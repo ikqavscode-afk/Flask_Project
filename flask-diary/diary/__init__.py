@@ -46,9 +46,11 @@ def create_app(overrides=None):
 
     from . import models  # noqa: F401  (регистрирует модели для Alembic)
     from .core.errors import register_error_handlers
+    from .core.security import register_security_headers
 
     for blueprint in _blueprints():
         app.register_blueprint(blueprint)
     register_error_handlers(app)
+    register_security_headers(app)
 
     return app
