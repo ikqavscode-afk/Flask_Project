@@ -1,0 +1,24 @@
+{#
+  Окно подтверждения на нативном <dialog> (доступно с клавиатуры и скринридерам:
+  фокус внутри окна, закрытие по Esc, фокус возвращается на кнопку, открывшую окно).
+
+  Использование:
+    {% from "components/confirm_dialog.html" import confirm_dialog %}
+    <form method="POST" action="..." data-confirm-dialog="my-dialog">...</form>
+    {{ confirm_dialog('my-dialog', 'Заголовок?', 'Пояснение.', 'Подтвердить') }}
+
+  Форму связывает с окном атрибут data-confirm-dialog (скрипт static/js/confirm-dialog.js).
+  Без скрипта форма просто отправляется.
+#}
+{% macro confirm_dialog(id, title, message, confirm_label='Подтвердить', cancel_label='Отмена') %}
+<dialog id="{{ id }}" class="dialog" aria-labelledby="{{ id }}-title" aria-describedby="{{ id }}-text">
+    <form method="dialog">
+        <h2 id="{{ id }}-title">{{ title }}</h2>
+        <p id="{{ id }}-text">{{ message }}</p>
+        <div class="dialog-actions">
+            <button class="btn btn-secondary" type="submit" value="cancel" autofocus>{{ cancel_label }}</button>
+            <button class="btn btn-danger" type="submit" value="confirm">{{ confirm_label }}</button>
+        </div>
+    </form>
+</dialog>
+{% endmacro %}
