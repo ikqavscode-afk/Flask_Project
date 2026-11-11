@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование карточки{% endblock %}
+
+{% block content %}
+
+<div class="card-box">
+
+    <h1>Редактирование карточки</h1>
+
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="title">Заголовок</label>
+
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ card.title }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="subtitle">Подзаголовок</label>
+
+            <input
+                type="text"
+                id="subtitle"
+                name="subtitle"
+                value="{{ card.subtitle or '' }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="text">Текст</label>
+
+            <textarea
+                id="text"
+                name="text"
+                required
+            >{{ card.text or '' }}</textarea>
+        </div>
+
+        <button class="btn" type="submit">
+            Сохранить
+        </button>
+
+    </form>
+
+    <br>
+
+    <a class="btn btn-secondary" href="{{ url_for('card', id=card.id) }}">
+        Отмена
+    </a>
+
+</div>
+
+{% endblock %}

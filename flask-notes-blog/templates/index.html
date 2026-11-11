@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Мой блог{% endblock %}
+
+{% block content %}
+
+<section id="about" aria-labelledby="about-title">
+    <h2 id="about-title">Обо мне</h2>
+    <p>
+        Разрабатываю веб-приложения на Python и Flask,
+        пишу автотесты и слежу за качеством кода.
+    </p>
+    <img
+        class="hero"
+        src="{{ url_for('static', filename='img/specialization.webp') }}"
+        alt="QA Engineering &amp; Python Development"
+        width="1168"
+        height="784"
+    >
+</section>
+
+<section id="skills" aria-labelledby="skills-title">
+    <h2 id="skills-title">Навыки</h2>
+    <ul class="tags">
+        <li>Python</li>
+        <li>Flask</li>
+        <li>SQLAlchemy</li>
+        <li>HTML</li>
+        <li>CSS</li>
+        <li>Pytest</li>
+        <li>Postman</li>
+        <li>Charles</li>
+        <li>Android Studio</li>
+        <li>VS Code</li>
+        <li>Terminal</li>
+        <li>DevTools</li>
+    </ul>
+</section>
+
+<section id="projects" aria-labelledby="projects-title">
+    <h2 id="projects-title">Проекты</h2>
+    <ul>
+        <li><strong>Flask Diary</strong> — дневник с личными карточками, поиском и защитой форм.</li>
+        <li><strong>Notes Blog</strong> — блог с заметками, входом и миграциями базы данных.</li>
+        <li><strong>CLI Shop</strong> — консольный магазин на ООП с собственными сортировками.</li>
+        <li><strong>Algorithms</strong> — задачи динамического программирования с тестами.</li>
+    </ul>
+</section>
+
+{% endblock %}

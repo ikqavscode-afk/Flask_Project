@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>{% block title %}Мой блог{% endblock %}</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+    <a class="skip-link" href="#content">Перейти к содержимому</a>
+
+    <header>
+
+        <img
+            class="brand-logo"
+            src="{{ url_for('static', filename='img/logo.webp') }}"
+            alt="RAY"
+            width="64"
+            height="64"
+        >
+
+        <p class="site-title">Мой блог</p>
+
+        <nav aria-label="Основная навигация">
+            <a href="{{ url_for('index') }}">Главная</a>
+            <a href="{{ url_for('notes') }}">Дневник программиста</a>
+            <a href="{{ url_for('home') }}">Аккаунт</a>
+            <a href="{{ url_for('logout') }}">Выйти</a>
+        </nav>
+
+    </header>
+
+    <main id="content">
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes" role="status">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer>
+        <p>Мой блог</p>
+    </footer>
+
+</body>
+
+</html>

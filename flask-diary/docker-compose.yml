@@ -1,0 +1,15 @@
+services:
+  diary:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Обязательная переменная: задайте SECRET_KEY в .env или в окружении
+      SECRET_KEY: ${SECRET_KEY:?Задайте SECRET_KEY (см. .env.example)}
+      DATABASE_URL: sqlite:////data/diary.db
+    volumes:
+      - diary-data:/data
+    restart: unless-stopped
+
+volumes:
+  diary-data:

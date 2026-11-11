@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+
+# Исходные архивы и временное
+_zips/
+_tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Flask / БД
+instance/
+*.db
+*.sqlite3
+
+# Пользовательские данные приложений
+cli-shop/data/
+
+# Окружение
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
