@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py .
+COPY main.py config.py ./
 COPY static ./static
 COPY templates ./templates
 
@@ -16,7 +16,8 @@ COPY templates ./templates
 RUN useradd --create-home appuser && mkdir /data && chown appuser /data
 USER appuser
 
-ENV DATABASE_URL=sqlite:////data/diary.db \
+ENV APP_ENV=production \
+    DATABASE_URL=sqlite:////data/diary.db \
     PORT=8000
 
 EXPOSE 8000

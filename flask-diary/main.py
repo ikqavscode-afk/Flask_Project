@@ -6,12 +6,11 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (LoginManager, UserMixin, login_required, login_user, current_user, logout_user)
 
+from config import get_secret_key
+
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get(
-    'SECRET_KEY',
-    'dev-secret-key'
-)
+app.config['SECRET_KEY'] = get_secret_key()
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'DATABASE_URL',

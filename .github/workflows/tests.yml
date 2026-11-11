@@ -69,7 +69,7 @@ jobs:
       - name: Build image
         run: docker build -t flask-diary flask-diary
       - name: Start container
-        run: docker run -d --name diary -p 8000:8000 -e SECRET_KEY=ci-secret flask-diary
+        run: docker run -d --name diary -p 8000:8000 -e SECRET_KEY=ci-secret-key-for-smoke-test flask-diary
       - name: Check that the app responds
         run: |
           for i in $(seq 1 15); do

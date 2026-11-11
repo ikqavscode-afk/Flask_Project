@@ -6,6 +6,7 @@ services:
     environment:
       # Обязательная переменная: задайте SECRET_KEY в .env или в окружении
       SECRET_KEY: ${SECRET_KEY:?Задайте SECRET_KEY (см. .env.example)}
+      APP_ENV: production
       DATABASE_URL: sqlite:////data/diary.db
     volumes:
       - diary-data:/data
