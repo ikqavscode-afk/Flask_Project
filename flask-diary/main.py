@@ -3,8 +3,9 @@ import os
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFError, CSRFProtect
 from sqlalchemy import text
+from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (LoginManager, UserMixin, login_required, login_user, current_user, logout_user)
 
@@ -163,6 +164,42 @@ def index():
     return render_template(
         'index.html', cards=pagination.items, pagination=pagination, q=q
     )
+
+# ---------- Страницы ошибок ----------
+# Страница ошибки не зависит от базы данных и сессии, а текст ошибки
+# и пользовательский ввод на ней не показываются.
+ERROR_PAGES = {
+    400: ('Некорректный запрос', 'Не удалось обработать запрос. Обновите страницу и повторите действие.'),
+    404: ('Страница не найдена', 'Такой страницы нет. Проверьте адрес или вернитесь на главную.'),
+    405: ('Действие не поддерживается', 'Это действие нельзя выполнить таким способом.'),
+    413: ('Слишком большой запрос', 'Отправленные данные превышают допустимый размер.'),
+    500: ('Внутренняя ошибка сервера', 'Что-то пошло не так. Попробуйте повторить действие позже.'),
+}
+DEFAULT_ERROR_PAGE = ('Ошибка', 'Не удалось выполнить запрос.')
+
+
+def render_error(code, title, message):
+    return render_template('error.html', code=code, title=title, message=message), code
+
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(error):
+    app.logger.warning('csrf rejected ip=%s', request.remote_addr)
+    return render_error(
+        400,
+        'Сессия устарела',
+        'Форма была отправлена с устаревшей страницы. Обновите страницу и повторите действие.',
+    )
+
+
+@app.errorhandler(HTTPException)
+def handle_http_error(error):
+    # перенаправления (3xx) пропускаем как есть
+    if error.code is None or error.code < 400:
+        return error
+    title, message = ERROR_PAGES.get(error.code, DEFAULT_ERROR_PAGE)
+    return render_error(error.code, title, message)
+
 
 @app.route('/health')
 def health():

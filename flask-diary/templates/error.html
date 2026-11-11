@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>{{ code }} — {{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <a class="skip-link" href="#content">Перейти к содержимому</a>
+
+    <header class="site-header">
+        <div class="header-content">
+            <a class="logo" href="{{ url_for('home') }}">
+                <img class="logo-img" src="{{ url_for('static', filename='img/logo.webp') }}" alt="" width="40" height="40">
+                Мой дневник
+            </a>
+        </div>
+    </header>
+
+    <main id="content">
+        <div class="card-box error-box">
+            <p class="error-code" aria-hidden="true">{{ code }}</p>
+            <h1>{{ title }}</h1>
+            <p>{{ message }}</p>
+            <a class="btn" href="{{ url_for('home') }}">На главную</a>
+        </div>
+    </main>
+</body>
+</html>

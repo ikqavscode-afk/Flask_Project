@@ -710,3 +710,21 @@ textarea:focus-visible {
     color: var(--muted);
     font-size: .85rem;
 }
+
+/* Страницы ошибок */
+.error-box {
+    text-align: center;
+}
+
+.error-code {
+    margin: 0;
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--primary-dark);
+}
+
+.error-box h1::after {
+    margin-left: auto;
+    margin-right: auto;
+}
