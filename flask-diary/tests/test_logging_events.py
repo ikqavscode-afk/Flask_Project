@@ -1,41 +1,29 @@
 import logging
 
 import pytest
-from flask.logging import default_handler
 
 import diary.cards.views as card_views
-from diary.logging_setup import configure_logging, get_log_level, safe_text
+from tests import helpers
 
 PASSWORD = 'очень-секретный-пароль-123'
 
 
-@pytest.fixture
-def logs(caplog, app):
-    caplog.set_level(logging.INFO, logger=app.logger.name)
-    return caplog
-
-
 def register(client, username='alice', password=PASSWORD):
-    return client.post(
-        '/register',
-        data={'username': username, 'password': password},
-        follow_redirects=True,
-    )
+    return helpers.register(client, username, password)
 
 
 def login(client, username='alice', password=PASSWORD):
-    return client.post(
-        '/login/',
-        data={'username': username, 'password': password},
-        follow_redirects=True,
-    )
+    return helpers.login(client, username, password)
 
 
 def messages(logs):
     return [record.getMessage() for record in logs.records]
 
 
-# ---------- События ----------
+@pytest.fixture
+def logs(caplog, app):
+    caplog.set_level(logging.INFO, logger=app.logger.name)
+    return caplog
 
 
 def test_register_and_login_are_logged(client, logs):
@@ -85,9 +73,6 @@ def test_card_changes_are_logged_without_content(client, logs):
         assert private not in text
 
 
-# ---------- Что в журнал попадать не должно ----------
-
-
 def test_passwords_never_appear_in_logs(client, logs):
     register(client)
     login(client)
@@ -111,9 +96,6 @@ def test_log_injection_via_username_is_neutralized(client, logs):
     assert all('\n' not in m for m in failed)
 
 
-# ---------- Необработанные ошибки ----------
-
-
 def test_unhandled_error_is_logged_with_traceback(app, client, monkeypatch, logs):
     register(client)
     login(client)
@@ -131,46 +113,3 @@ def test_unhandled_error_is_logged_with_traceback(app, client, monkeypatch, logs
     assert errors
     assert errors[0].exc_info is not None
     assert 'внутренний сбой' not in response.get_data(as_text=True)
-
-
-# ---------- Вспомогательные функции ----------
-
-
-def test_safe_text_removes_control_characters():
-    assert safe_text('a\nb\r\tc\x00d') == 'a b  c d'
-
-
-def test_safe_text_truncates_long_values():
-    result = safe_text('x' * 100, limit=10)
-
-    assert result == 'x' * 10 + '…'
-
-
-@pytest.mark.parametrize(
-    ('env', 'expected'),
-    [
-        ({}, 'INFO'),
-        ({'LOG_LEVEL': 'debug'}, 'DEBUG'),
-        ({'LOG_LEVEL': 'ERROR'}, 'ERROR'),
-        ({'LOG_LEVEL': 'болтовня'}, 'INFO'),
-        ({'LOG_LEVEL': ''}, 'INFO'),
-    ],
-)
-def test_get_log_level(env, expected):
-    assert get_log_level(env) == expected
-
-
-def test_flask_default_handler_is_removed(app):
-    logger = configure_logging(app, 'INFO')
-
-    assert default_handler not in logger.handlers
-    assert len(logger.handlers) == 1
-
-
-def test_configure_logging_does_not_duplicate_handlers(app):
-    logger = configure_logging(app, 'INFO')
-    before = len(logger.handlers)
-
-    configure_logging(app, 'INFO')
-
-    assert len(logger.handlers) == before

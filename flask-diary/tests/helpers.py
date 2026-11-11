@@ -1,5 +1,8 @@
 """Общие помощники тестов: регистрация, вход, создание карточки."""
 
+from diary.extensions import db
+from diary.models import Card, User
+
 DEFAULT_PASSWORD = 'secret123'
 
 
@@ -34,3 +37,13 @@ def create_card(client, title='Моя заметка', subtitle='подзаго�
 
 def html(response):
     return response.get_data(as_text=True)
+
+
+def count_users(app):
+    with app.app_context():
+        return db.session.query(User).count()
+
+
+def count_cards(app):
+    with app.app_context():
+        return db.session.query(Card).count()

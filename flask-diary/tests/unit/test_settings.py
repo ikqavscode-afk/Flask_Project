@@ -1,6 +1,13 @@
 import pytest
 
-from diary.settings import DEV_SECRET_KEY, get_secret_key, is_production
+from diary.settings import (
+    DEV_SECRET_KEY,
+    engine_options,
+    get_secret_key,
+    is_production,
+    normalize_database_url,
+    security_settings,
+)
 
 STRONG_KEY = "x" * 32
 
@@ -43,9 +50,6 @@ def test_is_production(env, expected):
     assert is_production(env) is expected
 
 
-from diary.settings import security_settings  # noqa: E402
-
-
 def test_cookie_flags_in_development():
     settings = security_settings({})
 
@@ -61,9 +65,6 @@ def test_cookie_flags_in_production():
     assert settings["REMEMBER_COOKIE_SECURE"] is True
     assert settings["SESSION_COOKIE_HTTPONLY"] is True
     assert settings["SESSION_COOKIE_SAMESITE"] == "Lax"
-
-
-from diary.settings import engine_options, normalize_database_url  # noqa: E402
 
 
 @pytest.mark.parametrize(
