@@ -51,7 +51,7 @@ jobs:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
           RESTORE_CHECK_URL: postgresql://check:check@localhost:5432/check
         run: scripts/backup_db.sh backups
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: diary-backup-${{ github.run_id }}
           path: backups/*.dump.enc
