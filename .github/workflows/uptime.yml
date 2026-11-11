@@ -1,0 +1,24 @@
+# Проверка доступности сайта. Если сайт не отвечает, запуск завершается ошибкой,
+# и GitHub присылает уведомление (Settings → Notifications → Actions: «Send notifications for failed workflows only»).
+#
+# Побочный эффект: регулярные запросы не дают бесплатному сервису Render засыпать (меньше «холодных» стартов).
+# Он расходует бесплатные часы (лимит 750 в месяц; один сервис, работающий круглосуточно, это около 744).
+# Чтобы отключить, удалите блок schedule: проверку можно запускать вручную (workflow_dispatch).
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check /health
+        env:
+          # Адрес можно сменить в Settings → Secrets and variables → Actions → Variables (APP_URL)
+          APP_URL: ${{ vars.APP_URL || 'https://flask-diary-vwos.onrender.com' }}
+        run: scripts/check_health.sh "$APP_URL" 3 20
