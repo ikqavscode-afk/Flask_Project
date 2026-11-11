@@ -1,0 +1,33 @@
+# Описание публикации на Render (Blueprint). Подробности: docs/deployment.md
+# Поля сверены с https://render.com/docs/blueprint-spec
+databases:
+  - name: diary-db
+    plan: free              # ВНИМАНИЕ: бесплатная база истекает через 30 дней и не имеет бэкапов (см. docs/deployment.md)
+    databaseName: diary
+    user: diary
+    postgresMajorVersion: "16"   # как в проверках CI
+
+services:
+  - type: web
+    name: flask-diary
+    runtime: docker
+    plan: free
+    # Пути считаются от корня репозитория (не от rootDir)
+    dockerfilePath: ./flask-diary/Dockerfile
+    dockerContext: ./flask-diary
+    healthCheckPath: /health
+    # Выкатывать только после успешных проверок CI на GitHub
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: diary-db
+          property: connectionString
+      - key: PORT
+        value: "10000"
+      - key: LOG_LEVEL
+        value: INFO
