@@ -137,6 +137,7 @@ def test_backup_workflow_is_opt_in_and_verifies_restore():
     secret_text = (WORKFLOWS / 'backup.yml').read_text(encoding='utf-8')
 
     assert "vars.BACKUP_ENABLED == 'true'" in job['if']  # без настройки владельца не запускается
+    assert job['runs-on'] != 'ubuntu-latest'  # образ закреплён: клиент PostgreSQL 16 есть не везде
     assert 'scripts/backup_db.sh' in commands
     assert 'RESTORE_CHECK_URL' in secret_text  # восстановление проверяется всегда
     assert 'secrets.BACKUP_DATABASE_URL' in secret_text

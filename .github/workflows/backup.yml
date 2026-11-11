@@ -19,7 +19,8 @@ on:
 jobs:
   backup:
     if: ${{ vars.BACKUP_ENABLED == 'true' }}
-    runs-on: ubuntu-latest
+    # Закреплён образ: в новом ubuntu-latest нет пакета postgresql-client-16
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
       postgres:
