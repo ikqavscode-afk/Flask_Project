@@ -81,6 +81,10 @@ flask --app main db downgrade                    # откатить послед
 - `users` — `id`, `username` (уникальное), `password` (хеш);
 - `card` — `id`, `title`, `subtitle`, `text`, `user_id` (владелец).
 
+## Версии Python
+
+Нужна Python 3.12 или новее. В CI тесты выполняются на 3.12 и 3.14, Docker-образ и публикация используют 3.12 (файл `.python-version`).
+
 ## Запуск
 
 ```bash
