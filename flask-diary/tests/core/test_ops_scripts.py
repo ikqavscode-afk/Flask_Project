@@ -1,6 +1,7 @@
 """Скрипты эксплуатации и их рабочие процессы GitHub Actions."""
 
 import http.server
+import itertools
 import os
 import shutil
 import subprocess
@@ -116,6 +117,16 @@ def test_uptime_workflow_runs_on_schedule_and_uses_the_script():
     assert 'url' in triggers['workflow_dispatch']['inputs']  # ручная проверка с любым адресом
     assert 'scripts/check_health.sh' in commands
     assert (SCRIPTS / 'check_health.sh').is_file()
+
+
+def test_uptime_schedule_avoids_the_start_of_the_hour():
+    """GitHub задерживает и пропускает плановые запуски в начале часа (минута 0)."""
+    cron = (workflow('uptime.yml').get(True) or workflow('uptime.yml')['on'])['schedule'][0]['cron']
+    minutes = [int(value) for value in cron.split()[0].split(',')]
+
+    assert 0 not in minutes
+    assert len(minutes) >= 6  # не реже, чем раз в 10 минут
+    assert min(b - a for a, b in itertools.pairwise(minutes)) >= 5  # не чаще, чем раз в 5
 
 
 def test_backup_workflow_is_opt_in_and_verifies_restore():
