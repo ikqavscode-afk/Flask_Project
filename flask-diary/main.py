@@ -17,12 +17,14 @@ from config import (
     normalize_database_url,
     security_settings,
 )
+from app_logging import configure_logging, get_log_level, safe_text
 from validation import validate_card, validate_password, validate_username
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = get_secret_key()
 app.config.update(security_settings())
+configure_logging(app, get_log_level(os.environ))
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1024  # больше 64 КБ в запросе — ошибка 413
 
 if is_production():
@@ -104,6 +106,7 @@ def register():
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
+        app.logger.info('register ok user_id=%s ip=%s', user.id, request.remote_addr)
         flash('Регистрация прошла успешно! Теперь войдите.', 'success')
         return redirect(url_for('login'))
 
@@ -119,8 +122,13 @@ def login():
         user = db.session.query(User).filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user)
+            app.logger.info('login ok user_id=%s ip=%s', user.id, request.remote_addr)
             return redirect(url_for('index'))
 
+        app.logger.warning(
+            'login failed username=%r ip=%s',
+            safe_text(username or ''), request.remote_addr,
+        )
         flash('Неверный логин или пароль', 'error')
         return redirect(url_for('login'))
 
@@ -130,6 +138,7 @@ def login():
 @app.route('/logout/', methods=['POST'])
 @login_required
 def logout():
+    app.logger.info('logout user_id=%s', current_user.id)
     logout_user()
     return redirect(url_for('home'))
   
@@ -217,6 +226,7 @@ def form_create():
 
         db.session.add(card)
         db.session.commit()
+        app.logger.info('card created id=%s user_id=%s', card.id, current_user.id)
 
         flash('Карточка создана!', 'success')
         return redirect(url_for('index'))
@@ -243,6 +253,7 @@ def edit_card(id):
         card.subtitle = data['subtitle']
         card.text = data['text']
         db.session.commit()
+        app.logger.info('card updated id=%s user_id=%s', card.id, current_user.id)
 
         flash('Карточка обновлена!', 'success')
         return redirect(url_for('card', id=card.id))
@@ -255,8 +266,10 @@ def edit_card(id):
 def delete_card(id):
     card = Card.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
+    card_id = card.id
     db.session.delete(card)
     db.session.commit()
+    app.logger.info('card deleted id=%s user_id=%s', card_id, current_user.id)
 
     flash('Карточка удалена', 'success')
     return redirect(url_for('index'))

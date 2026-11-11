@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py config.py validation.py ./
+COPY main.py config.py validation.py app_logging.py ./
 COPY static ./static
 COPY templates ./templates
 COPY migrations ./migrations
@@ -28,4 +28,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/health' % os.environ.get('PORT', '8000'), timeout=3)"
 
 # Сначала применяем миграции базы, затем запускаем сервер
-CMD ["sh", "-c", "flask --app main db upgrade && gunicorn --bind 0.0.0.0:${PORT} --workers 2 main:app"]
+CMD ["sh", "-c", "flask --app main db upgrade && gunicorn --bind 0.0.0.0:${PORT} --workers 2 --access-logfile - --access-logformat '%(h)s \"%(m)s %(U)s\" %(s)s %(b)s %(L)s' main:app"]
