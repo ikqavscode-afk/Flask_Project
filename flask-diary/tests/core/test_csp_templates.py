@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parent.parent / 'diary'
+ROOT = Path(__file__).resolve().parents[2] / 'diary'
 TEMPLATES = sorted((ROOT / 'templates').rglob('*.html'))
 
 FORBIDDEN = {

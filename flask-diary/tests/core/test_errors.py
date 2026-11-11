@@ -2,22 +2,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 import diary.cards.views as card_views
-
-
-def register(client, username='alice', password='secret123'):
-    return client.post(
-        '/register', data={'username': username, 'password': password}, follow_redirects=True
-    )
-
-
-def login(client, username='alice', password='secret123'):
-    return client.post(
-        '/login/', data={'username': username, 'password': password}, follow_redirects=True
-    )
-
-
-def html(response):
-    return response.get_data(as_text=True)
+from tests.helpers import html, login, register
 
 
 def test_404_page_is_friendly(client):

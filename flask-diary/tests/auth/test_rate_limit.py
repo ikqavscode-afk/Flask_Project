@@ -5,12 +5,7 @@ import pytest
 from diary.auth import services
 from diary.extensions import db
 from diary.models import LoginAttempt
-
-
-def register(client, username='alice', password='secret123'):
-    return client.post(
-        '/register', data={'username': username, 'password': password}, follow_redirects=True
-    )
+from tests.helpers import register
 
 
 def attempt(client, username='alice', password='неверный-пароль', ip='10.0.0.1'):
