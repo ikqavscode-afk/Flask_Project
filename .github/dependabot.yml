@@ -1,0 +1,22 @@
+# Автоматические предложения обновлений: зависимости, GitHub Actions и базовый образ Docker.
+# Каждое предложение проходит те же проверки CI, что и обычный коммит.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /flask-diary
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: pip
+    directory: /flask-notes-blog
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /flask-diary
+    schedule:
+      interval: weekly
