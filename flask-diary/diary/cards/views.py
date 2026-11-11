@@ -12,9 +12,15 @@ from flask import (
 from flask_login import current_user, login_required
 
 from . import services
-from .validation import validate_card
+from .validation import SUBTITLE_MAX, TEXT_MAX, TITLE_MAX, validate_card
 
 bp = Blueprint('cards', __name__)
+
+
+@bp.context_processor
+def inject_limits():
+    """Пределы длины полей для шаблонов: один источник правды с проверкой данных."""
+    return {'limits': {'title': TITLE_MAX, 'subtitle': SUBTITLE_MAX, 'text': TEXT_MAX}}
 
 
 def _validated_form():
@@ -46,12 +52,6 @@ def index():
 def detail(id):
     card = services.get_user_card_or_404(id, current_user.id)
     return render_template('cards/card.html', card=card)
-
-
-@bp.route('/create')
-@login_required
-def create_shortcut():
-    return redirect(url_for('cards.create'))
 
 
 @bp.route('/form_create', methods=['GET', 'POST'])

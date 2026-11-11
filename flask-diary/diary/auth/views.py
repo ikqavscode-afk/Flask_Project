@@ -18,9 +18,48 @@ from ..core.errors import render_error
 from ..extensions import login_manager
 from ..logging_setup import safe_text
 from . import services
-from .validation import validate_password, validate_username
+from .validation import (
+    PASSWORD_MAX,
+    PASSWORD_MIN,
+    USERNAME_MAX,
+    USERNAME_MIN,
+    validate_password,
+    validate_username,
+)
 
 bp = Blueprint('auth', __name__)
+
+
+@bp.context_processor
+def inject_limits():
+    """Пределы длины логина и пароля для шаблонов: один источник правды с проверкой данных."""
+    return {
+        'limits': {
+            'username_min': USERNAME_MIN,
+            'username_max': USERNAME_MAX,
+            'password_min': PASSWORD_MIN,
+            'password_max': PASSWORD_MAX,
+        }
+    }
+
+
+def _too_many_attempts_response(username, ip, retry_after):
+    """Страница 429 с заголовком Retry-After и записью в журнале."""
+    current_app.logger.warning(
+        'login blocked username=%r ip=%s retry_after=%ss',
+        safe_text(username or ''),
+        ip,
+        retry_after,
+    )
+    minutes = max(1, math.ceil(retry_after / 60))
+    body, code = render_error(
+        429,
+        'Слишком много попыток входа',
+        f'Подождите {minutes} мин. и повторите попытку.',
+    )
+    response = make_response(body, code)
+    response.headers['Retry-After'] = str(retry_after)
+    return response
 
 
 @login_manager.user_loader
@@ -66,21 +105,7 @@ def login():
 
         retry_after = services.login_retry_after(ip, username)
         if retry_after:
-            current_app.logger.warning(
-                'login blocked username=%r ip=%s retry_after=%ss',
-                safe_text(username or ''),
-                ip,
-                retry_after,
-            )
-            minutes = max(1, math.ceil(retry_after / 60))
-            body, code = render_error(
-                429,
-                'Слишком много попыток входа',
-                f'Подождите {minutes} мин. и повторите попытку.',
-            )
-            response = make_response(body, code)
-            response.headers['Retry-After'] = str(retry_after)
-            return response
+            return _too_many_attempts_response(username, ip, retry_after)
 
         user = services.find_user(username)
         if user and user.check_password(password):

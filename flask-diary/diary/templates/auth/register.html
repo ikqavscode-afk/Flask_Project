@@ -20,12 +20,12 @@
                 name="username"
                 value="{{ username or '' }}"
                 required
-                minlength="3"
-                maxlength="50"
+                minlength="{{ limits.username_min }}"
+                maxlength="{{ limits.username_max }}"
                 autocomplete="username"
                 aria-describedby="username-hint"
             >
-            <small id="username-hint">3–50 символов: буквы, цифры, точка, дефис, подчёркивание</small>
+            <small id="username-hint">{{ limits.username_min }}–{{ limits.username_max }} символов: буквы, цифры, точка, дефис, подчёркивание</small>
         </div>
 
         <div class="form-group">
@@ -36,12 +36,12 @@
                 id="password"
                 name="password"
                 required
-                minlength="8"
-                maxlength="128"
+                minlength="{{ limits.password_min }}"
+                maxlength="{{ limits.password_max }}"
                 autocomplete="new-password"
                 aria-describedby="password-hint"
             >
-            <small id="password-hint">От 8 до 128 символов</small>
+            <small id="password-hint">От {{ limits.password_min }} до {{ limits.password_max }} символов</small>
         </div>
 
         <button class="btn" type="submit">

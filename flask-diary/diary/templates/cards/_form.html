@@ -1,0 +1,51 @@
+{#
+  Общая форма карточки для создания и редактирования.
+  values: словарь с полями title, subtitle, text (пустой или с текущими значениями);
+  limits: пределы длины из cards/validation.py (подставляются в maxlength).
+#}
+{% macro card_form(values, limits, submit_label) %}
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-group">
+        <label for="title">Заголовок</label>
+
+        <input
+            type="text"
+            id="title"
+            name="title"
+            value="{{ values.get('title', '') }}"
+            required
+            maxlength="{{ limits.title }}"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="subtitle">Подзаголовок</label>
+
+        <input
+            type="text"
+            id="subtitle"
+            name="subtitle"
+            value="{{ values.get('subtitle', '') }}"
+            maxlength="{{ limits.subtitle }}"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="text">Текст</label>
+
+        <textarea
+            id="text"
+            name="text"
+            required
+            maxlength="{{ limits.text }}"
+        >{{ values.get('text', '') }}</textarea>
+    </div>
+
+    <button class="btn" type="submit">
+        {{ submit_label }}
+    </button>
+
+</form>
+{% endmacro %}
