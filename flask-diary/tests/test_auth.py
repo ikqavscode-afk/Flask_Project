@@ -293,3 +293,14 @@ def test_header_has_logout_form_not_link(client):
 
     assert 'action="/logout/"' in html
     assert 'href="/logout/"' not in html
+
+
+def test_password_is_stored_as_hash(app, client):
+    register(client, password='secret123')
+
+    user = db.session.query(User).filter_by(username='alice').one()
+
+    assert user.password != 'secret123'
+    assert 'secret123' not in user.password
+    assert user.check_password('secret123')
+    assert not user.check_password('другой-пароль')

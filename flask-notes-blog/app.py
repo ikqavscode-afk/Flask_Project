@@ -137,4 +137,5 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Отладчик даёт выполнить код на сервере, поэтому включается только явно: FLASK_DEBUG=1
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
