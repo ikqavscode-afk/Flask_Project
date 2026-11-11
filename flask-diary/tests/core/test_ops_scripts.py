@@ -113,6 +113,7 @@ def test_uptime_workflow_runs_on_schedule_and_uses_the_script():
 
     assert triggers['schedule'][0]['cron']
     assert 'workflow_dispatch' in triggers
+    assert 'url' in triggers['workflow_dispatch']['inputs']  # ручная проверка с любым адресом
     assert 'scripts/check_health.sh' in commands
     assert (SCRIPTS / 'check_health.sh').is_file()
 
