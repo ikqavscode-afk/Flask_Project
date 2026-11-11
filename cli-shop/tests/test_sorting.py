@@ -1,15 +1,12 @@
 import pytest
 
+from shop import sorting
 from shop.models import Product
-from shop.sorting import SortAlgorithms
+from shop.sorting import CRITERIA, SortAlgorithms, precedes
 
-ALGORITHMS = [
-    SortAlgorithms.bubble_sort,
-    SortAlgorithms.insertion_sort,
-    SortAlgorithms.quick_sort,
-    SortAlgorithms.merge_sort,
-]
-ALGORITHM_IDS = ["bubble", "insertion", "quick", "merge"]
+# Алгоритмы берутся из реестра: новый алгоритм сразу попадает во все проверки ниже
+ALGORITHMS = [function for _, function in sorting.ALGORITHMS]
+ALGORITHM_IDS = [function.__name__ for function in ALGORITHMS]
 
 PRODUCTS = [
     Product("Ноутбук", "Электроника", 75000, 2.5),
@@ -66,3 +63,38 @@ def test_unknown_criteria_falls_back_to_name():
     key = SortAlgorithms._key_func("что-то другое")
 
     assert key(PRODUCTS[0]) == "ноутбук"
+
+
+# ---------- Реестры и общая функция сравнения ----------
+
+
+def test_registry_lists_every_algorithm_once():
+    labels = [label for label, _ in sorting.ALGORITHMS]
+
+    assert len(labels) == len(set(labels))
+    assert all(callable(function) for _, function in sorting.ALGORITHMS)
+    assert len(ALGORITHMS) >= 4
+
+
+def test_every_criterion_has_a_working_key():
+    names = [name for _, name, _ in CRITERIA]
+
+    assert len(names) == len(set(names))
+    for name in names:
+        key = SortAlgorithms._key_func(name)
+        assert all(key(product) is not None for product in PRODUCTS)
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "reverse", "expected"),
+    [
+        (1, 2, False, True),
+        (2, 1, False, False),
+        (1, 1, False, False),
+        (2, 1, True, True),
+        (1, 2, True, False),
+        (1, 1, True, False),
+    ],
+)
+def test_precedes_is_strict_and_respects_direction(first, second, reverse, expected):
+    assert precedes(first, second, reverse) is expected

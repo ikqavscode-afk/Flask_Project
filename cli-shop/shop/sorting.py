@@ -1,18 +1,29 @@
-"""Алгоритмы сортировки: пузырьком, вставками, быстрая, слиянием."""
+"""Алгоритмы сортировки: пузырьком, вставками, быстрая, слиянием.
+
+Чтобы добавить новый алгоритм, напишите функцию по образцу существующих и добавьте
+её в ``ALGORITHMS``: меню в консольном интерфейсе строится из этого списка.
+"""
+
+
+def precedes(first, second, reverse):
+    """Должен ли ключ first стоять строго раньше second (по возрастанию или убыванию)."""
+    return first > second if reverse else first < second
+
+
+# Критерии сортировки: подпись в меню, имя критерия, функция ключа
+CRITERIA = [
+    ("цена", "price", lambda p: p.price),
+    ("вес", "weight", lambda p: p.weight),
+    ("категория", "category", lambda p: p.category.lower()),
+]
+_KEY_FUNCS = {name: func for _, name, func in CRITERIA}
 
 
 class SortAlgorithms:
     @staticmethod
     def _key_func(criteria):
-        """Возвращает функцию ключа для сравнения"""
-        if criteria == "price":
-            return lambda p: p.price
-        elif criteria == "weight":
-            return lambda p: p.weight
-        elif criteria == "category":
-            return lambda p: p.category.lower()
-        else:
-            return lambda p: p.name.lower()
+        """Функция ключа для критерия; для неизвестного критерия сортировка по названию."""
+        return _KEY_FUNCS.get(criteria, lambda p: p.name.lower())
 
     # ---------- Пузырьковая ----------
     @staticmethod
@@ -22,9 +33,7 @@ class SortAlgorithms:
         for i in range(n):
             swapped = False
             for j in range(0, n - i - 1):
-                a = key_func(arr[j])
-                b = key_func(arr[j + 1])
-                if (a > b) if not reverse else (a < b):
+                if precedes(key_func(arr[j + 1]), key_func(arr[j]), reverse):
                     arr[j], arr[j + 1] = arr[j + 1], arr[j]
                     swapped = True
             if show_steps:
@@ -40,11 +49,7 @@ class SortAlgorithms:
         for i in range(1, len(arr)):
             key = arr[i]
             j = i - 1
-            while j >= 0 and (
-                (key_func(key) < key_func(arr[j]))
-                if not reverse
-                else (key_func(key) > key_func(arr[j]))
-            ):
+            while j >= 0 and precedes(key_func(key), key_func(arr[j]), reverse):
                 arr[j + 1] = arr[j]
                 j -= 1
             arr[j + 1] = key
@@ -61,11 +66,7 @@ class SortAlgorithms:
         left = []
         right = []
         for item in items[1:]:
-            if (
-                (key_func(item) < key_func(pivot))
-                if not reverse
-                else (key_func(item) > key_func(pivot))
-            ):
+            if precedes(key_func(item), key_func(pivot), reverse):
                 left.append(item)
             else:
                 right.append(item)
@@ -87,11 +88,7 @@ class SortAlgorithms:
         result = []
         i = j = 0
         while i < len(left) and j < len(right):
-            if (
-                (key_func(left[i]) < key_func(right[j]))
-                if not reverse
-                else (key_func(left[i]) > key_func(right[j]))
-            ):
+            if precedes(key_func(left[i]), key_func(right[j]), reverse):
                 result.append(left[i])
                 i += 1
             else:
@@ -102,3 +99,12 @@ class SortAlgorithms:
         if show_steps:
             print(f"  Слияние: {[p.name for p in result]}")
         return result
+
+
+# Алгоритмы для меню: подпись и функция (порядок определяет номера пунктов)
+ALGORITHMS = [
+    ("Пузырёк", SortAlgorithms.bubble_sort),
+    ("Вставками", SortAlgorithms.insertion_sort),
+    ("Быстрая", SortAlgorithms.quick_sort),
+    ("Слиянием", SortAlgorithms.merge_sort),
+]
