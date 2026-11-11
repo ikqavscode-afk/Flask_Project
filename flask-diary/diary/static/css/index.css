@@ -4,17 +4,13 @@
     position: sticky;
     top: 0;
     z-index: 100;
-
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.75)),
+    background-image: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.94)),
         url('../img/fon_2.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center 90%;
     backdrop-filter: blur(12px);
-
     border-bottom: 1px solid rgba(99, 102, 241, 0.12);
-
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
@@ -35,13 +31,13 @@
 
 .logo {
     text-decoration: none;
-
     font-size: 24px;
     font-weight: 800;
-
     color: var(--text);
-
     transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .logo:hover {
@@ -121,7 +117,7 @@
     --primary-dark: #4f46e5;
     --accent: #a855f7;
     --text: #1e2235;
-    --muted: #6b7280;
+    --muted: #4b5563;
     --surface: #ffffff;
     --bg: #eef0f9;
     --radius: 14px;
@@ -130,7 +126,6 @@
     --shadow-lg: 0 20px 50px rgba(79, 70, 229, .18);
     --tr: all .25s ease;
 }
-
 
 ::selection {
     background: var(--primary);
@@ -204,7 +199,7 @@ p {
     font-size: .95rem;
     background: rgba(255, 243, 205, .95);
     border: 1px solid #ffe08a;
-    color: #8a6d1a;
+    color: #6b5311;
     box-shadow: var(--shadow-sm);
     animation: rise .35s ease both;
 }
@@ -219,7 +214,7 @@ p {
 .btn {
     display: inline-block;
     position: relative;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: linear-gradient(135deg, var(--primary-dark), #7e22ce);
     color: #fff;
     padding: 12px 30px;
     border: none;
@@ -230,6 +225,8 @@ p {
     cursor: pointer;
     box-shadow: 0 6px 18px rgba(99, 102, 241, .35);
     transition: var(--tr);
+    min-height: 48px;
+    line-height: 1.4;
 }
 
 .btn:hover {
@@ -307,7 +304,7 @@ textarea:focus {
 
 input::placeholder,
 textarea::placeholder {
-    color: #a3a8bd;
+    color: #6b7280;
 }
 
 textarea {
@@ -402,13 +399,15 @@ textarea {
 /* Пусто */
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
     color: var(--muted);
 }
 
 .empty-state p {
     font-size: 1.05rem;
     margin-bottom: 18px;
+    color: var(--text);
+    font-weight: 500;
 }
 
 /* Скроллбар */
@@ -439,20 +438,15 @@ main a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    min-height: 42px;
+    min-height: 44px;
     padding: 0 18px;
-
     color: var(--primary);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
-
     background: rgba(99, 102, 241, .08);
     border: 1px solid rgba(99, 102, 241, .18);
     border-radius: 12px;
-
-    transition:
-        transform 0.2s ease,
+    transition: transform 0.2s ease,
         box-shadow 0.2s ease,
         background 0.2s ease;
 }
@@ -478,8 +472,8 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
+    outline: 3px solid var(--primary-dark);
+    outline-offset: 3px;
 }
 
 /* Белая карточка-подложка, как на странице home */
@@ -494,8 +488,6 @@ textarea:focus-visible {
 .page-card > .btn {
     margin: 14px 0 4px;
 }
-
-
 
 /* ===== Доступность (WCAG 2.1 AA) и адаптивность ===== */
 
@@ -529,31 +521,6 @@ textarea:focus-visible {
     top: 12px;
 }
 
-/* Контраст кнопок: белый текст ≥ 4.5:1 на всём градиенте */
-.btn {
-    background: linear-gradient(135deg, var(--primary-dark), #7e22ce);
-    min-height: 48px;
-    line-height: 1.4;
-}
-
-.btn-secondary {
-    background: var(--surface);
-}
-
-/* Контраст вторичного текста и подсказок */
-:root {
-    --muted: #4b5563;
-}
-
-input::placeholder,
-textarea::placeholder {
-    color: #6b7280;
-}
-
-.flash {
-    color: #6b5311;
-}
-
 /* Поиск: поле и кнопка в одной строке */
 .search-form {
     display: flex;
@@ -583,25 +550,6 @@ textarea::placeholder {
     margin-top: 32px;
 }
 
-/* Пустое состояние */
-.empty-state {
-    padding: 40px 20px;
-}
-
-.empty-state p {
-    color: var(--text);
-    font-weight: 500;
-}
-
-/* Заметный фокус для клавиатуры */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-    outline: 3px solid var(--primary-dark);
-    outline-offset: 3px;
-}
-
 /* Уважение системной настройки «уменьшить движение» */
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -629,21 +577,9 @@ textarea:focus-visible {
     }
 }
 
-/* Шапка: плотная подложка и тёмные ссылки для контраста ≥ 4.5:1 */
-.site-header {
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.94)),
-        url('../img/fon_2.jpg');
-}
-
 .nav > a:not(.nav-button),
 .nav-button-secondary {
     color: var(--primary-dark);
-}
-
-.nav > a:not(.nav-button) {
-    min-height: 44px;
-    font-size: 15px;
 }
 
 /* ===== Логотип: водяной знак в карточках и бренд в шапке ===== */
@@ -656,12 +592,6 @@ textarea:focus-visible {
     background-size: auto, 300px;
     background-repeat: no-repeat;
     background-position: center;
-}
-
-.logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
 }
 
 .logo-img {

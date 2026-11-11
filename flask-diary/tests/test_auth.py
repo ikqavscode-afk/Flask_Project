@@ -212,14 +212,11 @@ def test_register_with_empty_fields_shows_error(client):
     assert 'Заполните все поля'.encode() in response.data
 
 
-def test_create_redirects_to_form(client):
+def test_header_menu_links_directly_to_create_form(client):
     register(client)
-    login(client)
+    page = login(client).get_data(as_text=True)
 
-    response = client.get('/create')
-
-    assert response.status_code == 302
-    assert '/form_create' in response.headers['Location']
+    assert 'href="/form_create"' in page
 
 
 def test_create_form_page_opens(client):

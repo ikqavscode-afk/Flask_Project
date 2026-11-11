@@ -1,5 +1,7 @@
 import pytest
 
+import diary.auth.views as auth_views
+import diary.cards.views as card_views
 from diary.auth.validation import validate_password, validate_username
 from diary.cards.validation import validate_card
 from diary.extensions import db
@@ -259,3 +261,31 @@ def test_oversized_request_is_rejected(client):
     )
 
     assert response.status_code == 413
+
+
+def test_card_form_limits_come_from_validation_constants(client, monkeypatch):
+    monkeypatch.setattr(card_views, 'TITLE_MAX', 7)
+    monkeypatch.setattr(card_views, 'SUBTITLE_MAX', 8)
+    monkeypatch.setattr(card_views, 'TEXT_MAX', 9)
+    register(client)
+    login(client)
+
+    page = text_of(client.get('/form_create'))
+
+    assert 'maxlength="7"' in page
+    assert 'maxlength="8"' in page
+    assert 'maxlength="9"' in page
+
+
+def test_register_form_limits_come_from_validation_constants(client, monkeypatch):
+    monkeypatch.setattr(auth_views, 'USERNAME_MIN', 4)
+    monkeypatch.setattr(auth_views, 'USERNAME_MAX', 21)
+    monkeypatch.setattr(auth_views, 'PASSWORD_MIN', 11)
+    monkeypatch.setattr(auth_views, 'PASSWORD_MAX', 77)
+
+    page = text_of(client.get('/register'))
+
+    for expected in ('minlength="4"', 'maxlength="21"', 'minlength="11"', 'maxlength="77"'):
+        assert expected in page
+    assert '4–21 символов' in page
+    assert 'От 11 до 77 символов' in page

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "cards/_form.html" import card_form %}
 
 {% block title %}Редактирование карточки{% endblock %}
 
@@ -8,51 +9,8 @@
 
     <h1>Редактирование карточки</h1>
 
-    {% set f = form or {'title': card.title, 'subtitle': card.subtitle or '', 'text': card.text or ''} %}
-    <form method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-        <div class="form-group">
-            <label for="title">Заголовок</label>
-
-            <input
-                type="text"
-                id="title"
-                name="title"
-                value="{{ f.get('title', '') }}"
-                required
-                maxlength="100"
-            >
-        </div>
-
-        <div class="form-group">
-            <label for="subtitle">Подзаголовок</label>
-
-            <input
-                type="text"
-                id="subtitle"
-                name="subtitle"
-                value="{{ f.get('subtitle', '') }}"
-                maxlength="100"
-            >
-        </div>
-
-        <div class="form-group">
-            <label for="text">Текст</label>
-
-            <textarea
-                id="text"
-                name="text"
-                required
-                maxlength="5000"
-            >{{ f.get('text', '') }}</textarea>
-        </div>
-
-        <button class="btn" type="submit">
-            Сохранить
-        </button>
-
-    </form>
+    {% set current = {'title': card.title, 'subtitle': card.subtitle or '', 'text': card.text or ''} %}
+    {{ card_form(form or current, limits, 'Сохранить') }}
 
     <br>
 
