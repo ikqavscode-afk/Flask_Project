@@ -18,8 +18,14 @@
                 type="text"
                 id="username"
                 name="username"
+                value="{{ username or '' }}"
                 required
+                minlength="3"
+                maxlength="50"
+                autocomplete="username"
+                aria-describedby="username-hint"
             >
+            <small id="username-hint">3–50 символов: буквы, цифры, точка, дефис, подчёркивание</small>
         </div>
 
         <div class="form-group">
@@ -30,7 +36,12 @@
                 id="password"
                 name="password"
                 required
+                minlength="8"
+                maxlength="128"
+                autocomplete="new-password"
+                aria-describedby="password-hint"
             >
+            <small id="password-hint">От 8 до 128 символов</small>
         </div>
 
         <button class="btn" type="submit">

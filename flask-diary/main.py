@@ -9,11 +9,13 @@ from flask_login import (LoginManager, UserMixin, login_required, login_user, cu
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import get_secret_key, is_production, security_settings
+from validation import validate_card, validate_password, validate_username
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = get_secret_key()
 app.config.update(security_settings())
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024  # больше 64 КБ в запросе — ошибка 413
 
 if is_production():
     # За прокси хостинга (HTTPS завершается на нём): доверяем заголовкам
@@ -70,12 +72,19 @@ def load_user(user_id):
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        raw_username = request.form.get('username', '')
+        password = request.form.get('password', '')
 
-        if not username or not password:
+        if not raw_username.strip() or not password:
             flash('Заполните все поля', 'error')
             return redirect(url_for('register'))
+
+        username, error = validate_username(raw_username)
+        if error is None:
+            error = validate_password(password)
+        if error:
+            flash(error, 'error')
+            return render_template('register.html', username=raw_username), 400
 
         if db.session.query(User).filter_by(username=username).first():
             flash('Такой пользователь уже существует', 'error')
@@ -159,14 +168,20 @@ def create():
 @login_required
 def form_create():
     if request.method == 'POST':
-        title = request.form.get('title')
-        subtitle = request.form.get('subtitle')
-        text = request.form.get('text')
+        data, errors = validate_card(
+            request.form.get('title'),
+            request.form.get('subtitle'),
+            request.form.get('text'),
+        )
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return render_template('create.html', form=request.form), 400
 
         card = Card(
-            title=title,
-            subtitle=subtitle,
-            text=text,
+            title=data['title'],
+            subtitle=data['subtitle'],
+            text=data['text'],
             user_id=current_user.id
         )
 
@@ -176,7 +191,7 @@ def form_create():
         flash('Карточка создана!', 'success')
         return redirect(url_for('index'))
 
-    return render_template('create.html')
+    return render_template('create.html', form=None)
 
 @app.route('/card/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -184,20 +199,25 @@ def edit_card(id):
     card = Card.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
     if request.method == 'POST':
-        title = request.form.get('title', '').strip()
-        if not title:
-            flash('Заголовок не может быть пустым', 'error')
-            return redirect(url_for('edit_card', id=card.id))
+        data, errors = validate_card(
+            request.form.get('title'),
+            request.form.get('subtitle'),
+            request.form.get('text'),
+        )
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return render_template('edit.html', card=card, form=request.form), 400
 
-        card.title = title
-        card.subtitle = request.form.get('subtitle')
-        card.text = request.form.get('text')
+        card.title = data['title']
+        card.subtitle = data['subtitle']
+        card.text = data['text']
         db.session.commit()
 
         flash('Карточка обновлена!', 'success')
         return redirect(url_for('card', id=card.id))
 
-    return render_template('edit.html', card=card)
+    return render_template('edit.html', card=card, form=None)
 
 
 @app.route('/card/<int:id>/delete', methods=['POST'])

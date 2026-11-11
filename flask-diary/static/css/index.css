@@ -702,3 +702,11 @@ textarea:focus-visible {
 .nav-logout:hover {
     background: rgba(99, 102, 241, .14);
 }
+
+/* Подсказки под полями форм */
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: .85rem;
+}

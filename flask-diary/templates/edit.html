@@ -8,6 +8,7 @@
 
     <h1>Редактирование карточки</h1>
 
+    {% set f = form or {'title': card.title, 'subtitle': card.subtitle or '', 'text': card.text or ''} %}
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
@@ -18,8 +19,9 @@
                 type="text"
                 id="title"
                 name="title"
-                value="{{ card.title }}"
+                value="{{ f.get('title', '') }}"
                 required
+                maxlength="100"
             >
         </div>
 
@@ -30,7 +32,8 @@
                 type="text"
                 id="subtitle"
                 name="subtitle"
-                value="{{ card.subtitle or '' }}"
+                value="{{ f.get('subtitle', '') }}"
+                maxlength="100"
             >
         </div>
 
@@ -41,7 +44,8 @@
                 id="text"
                 name="text"
                 required
-            >{{ card.text or '' }}</textarea>
+                maxlength="5000"
+            >{{ f.get('text', '') }}</textarea>
         </div>
 
         <button class="btn" type="submit">
