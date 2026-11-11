@@ -2,7 +2,7 @@
 
 import os
 
-DEV_SECRET_KEY = "dev-secret-key"
+DEV_SECRET_KEY = "dev-secret-key"  # nosec B105: только для разработки, в production запрещён
 MIN_SECRET_KEY_LENGTH = 16
 
 
