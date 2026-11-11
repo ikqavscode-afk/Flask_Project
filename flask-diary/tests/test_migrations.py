@@ -57,6 +57,12 @@ def test_downgrade_removes_schema(empty_db):
     assert "card" not in table_names()
 
 
+def test_migration_does_not_disable_application_logger(empty_db):
+    upgrade(directory=MIGRATIONS_DIR)
+
+    assert app.logger.disabled is False
+
+
 def test_upgrade_is_repeatable(empty_db):
     upgrade(directory=MIGRATIONS_DIR)
     upgrade(directory=MIGRATIONS_DIR)

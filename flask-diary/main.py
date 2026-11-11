@@ -1,6 +1,8 @@
+import math
 import os
+from datetime import datetime, timedelta, timezone
 
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
+from flask import Flask, jsonify, make_response, render_template, request, redirect, url_for, flash
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFError, CSRFProtect
@@ -30,8 +32,9 @@ app.config['MAX_CONTENT_LENGTH'] = 64 * 1024  # больше 64 КБ в запр
 
 if is_production():
     # За прокси хостинга (HTTPS завершается на нём): доверяем заголовкам
-    # X-Forwarded-Proto и X-Forwarded-Host от одного прокси.
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    # X-Forwarded-For/Proto/Host от одного прокси. Настоящий адрес клиента
+    # нужен для ограничения попыток входа.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 DATABASE_URL = normalize_database_url(
     os.environ.get('DATABASE_URL', 'sqlite:///diary.db')
@@ -41,6 +44,13 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options(DATABASE_URL)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CARDS_PER_PAGE = 6
+
+# Ограничение попыток входа: после LOGIN_MAX_ATTEMPTS неудач с одного адреса
+# для одного логина (или LOGIN_MAX_ATTEMPTS_PER_IP неудач с одного адреса
+# для любых логинов) вход блокируется до конца окна LOGIN_WINDOW_SECONDS.
+app.config.setdefault('LOGIN_MAX_ATTEMPTS', 5)
+app.config.setdefault('LOGIN_MAX_ATTEMPTS_PER_IP', 20)
+app.config.setdefault('LOGIN_WINDOW_SECONDS', 300)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -74,6 +84,76 @@ class Card(db.Model):
     subtitle = db.Column(db.String(100))
     text = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+
+class LoginAttempt(db.Model):
+    """Неудачная попытка входа (для ограничения перебора паролей).
+
+    Хранится в базе, а не в памяти: процессов gunicorn несколько, и счётчик
+    в памяти одного из них можно было бы обойти.
+    """
+    __tablename__ = 'login_attempt'
+    __table_args__ = (db.Index('ix_login_attempt_key_created', 'key', 'created_at'),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+
+
+def utcnow():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _login_keys(ip, username):
+    """Ключи счётчиков: общий по адресу и по паре «адрес + логин».
+
+    Пара нужна, чтобы злоумышленник не мог заблокировать чужой аккаунт,
+    вводя неверные пароли со своего адреса. Логин берётся из формы как есть
+    (существует он или нет), поэтому по поведению нельзя узнать, есть ли
+    такой пользователь.
+    """
+    name = safe_text((username or '').strip().lower(), limit=50)
+    return f'ip:{ip}', f'ipuser:{ip}:{name}'
+
+
+def login_retry_after(ip, username):
+    """Через сколько секунд можно пробовать снова (0, если ограничения нет)."""
+    window = timedelta(seconds=app.config['LOGIN_WINDOW_SECONDS'])
+    now = utcnow()
+    ip_key, pair_key = _login_keys(ip, username)
+    limits = (
+        (ip_key, app.config['LOGIN_MAX_ATTEMPTS_PER_IP']),
+        (pair_key, app.config['LOGIN_MAX_ATTEMPTS']),
+    )
+    retry_after = 0
+    for key, limit in limits:
+        times = [
+            row[0] for row in db.session.query(LoginAttempt.created_at)
+            .filter(LoginAttempt.key == key, LoginAttempt.created_at >= now - window)
+            .order_by(LoginAttempt.created_at)
+            .all()
+        ]
+        if len(times) >= limit:
+            # разблокировка наступит, когда самая давняя из «лишних» попыток выйдет из окна
+            unblock_at = times[len(times) - limit] + window
+            retry_after = max(retry_after, math.ceil((unblock_at - now).total_seconds()))
+    return max(retry_after, 0)
+
+
+def record_failed_login(ip, username):
+    now = utcnow()
+    for key in _login_keys(ip, username):
+        db.session.add(LoginAttempt(key=key, created_at=now))
+    # заодно удаляем устаревшие записи
+    window = timedelta(seconds=app.config['LOGIN_WINDOW_SECONDS'])
+    LoginAttempt.query.filter(LoginAttempt.created_at < now - window).delete()
+    db.session.commit()
+
+
+def clear_failed_logins(ip, username):
+    _, pair_key = _login_keys(ip, username)
+    LoginAttempt.query.filter(LoginAttempt.key == pair_key).delete()
+    db.session.commit()
 
 
 @login_manager.user_loader
@@ -119,16 +199,35 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        ip = request.remote_addr or 'unknown'
+
+        retry_after = login_retry_after(ip, username)
+        if retry_after:
+            app.logger.warning(
+                'login blocked username=%r ip=%s retry_after=%ss',
+                safe_text(username or ''), ip, retry_after,
+            )
+            minutes = max(1, math.ceil(retry_after / 60))
+            body, code = render_error(
+                429,
+                'Слишком много попыток входа',
+                f'Подождите {minutes} мин. и повторите попытку.',
+            )
+            response = make_response(body, code)
+            response.headers['Retry-After'] = str(retry_after)
+            return response
 
         user = db.session.query(User).filter_by(username=username).first()
         if user and user.check_password(password):
+            clear_failed_logins(ip, username)
             login_user(user)
-            app.logger.info('login ok user_id=%s ip=%s', user.id, request.remote_addr)
+            app.logger.info('login ok user_id=%s ip=%s', user.id, ip)
             return redirect(url_for('index'))
 
+        record_failed_login(ip, username)
         app.logger.warning(
             'login failed username=%r ip=%s',
-            safe_text(username or ''), request.remote_addr,
+            safe_text(username or ''), ip,
         )
         flash('Неверный логин или пароль', 'error')
         return redirect(url_for('login'))
@@ -172,6 +271,7 @@ ERROR_PAGES = {
     400: ('Некорректный запрос', 'Не удалось обработать запрос. Обновите страницу и повторите действие.'),
     404: ('Страница не найдена', 'Такой страницы нет. Проверьте адрес или вернитесь на главную.'),
     405: ('Действие не поддерживается', 'Это действие нельзя выполнить таким способом.'),
+    429: ('Слишком много попыток', 'Подождите немного и повторите действие.'),
     413: ('Слишком большой запрос', 'Отправленные данные превышают допустимый размер.'),
     500: ('Внутренняя ошибка сервера', 'Что-то пошло не так. Попробуйте повторить действие позже.'),
 }
