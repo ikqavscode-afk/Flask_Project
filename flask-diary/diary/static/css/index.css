@@ -5,7 +5,7 @@
     top: 0;
     z-index: 100;
     background-image: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.94)),
-        url('../img/fon_2.jpg');
+        url('../img/fon_2.webp');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center 90%;
@@ -146,7 +146,7 @@ body {
         radial-gradient(900px 500px at 110% -10%, rgba(168, 85, 247, .10), transparent 60%),
         radial-gradient(900px 500px at -10% 110%, rgba(99, 102, 241, .10), transparent 60%),
         linear-gradient(rgba(238, 240, 249, 0.01), rgba(238, 240, 249, 0.85)),
-        url('../img/fon_1.jpg');
+        url('../img/fon_1.webp');
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;

@@ -8,7 +8,7 @@ import pytest
         ('/static/js/confirm-dialog.js', 'javascript'),
         ('/static/img/logo.webp', 'image/webp'),
         ('/static/img/favicon.png', 'image/png'),
-        ('/static/img/fon_1.jpg', 'image/jpeg'),
+        ('/static/img/fon_1.webp', 'image/webp'),
     ],
 )
 def test_static_files_have_correct_content_type(client, path, content_type):
