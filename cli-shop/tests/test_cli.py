@@ -1,5 +1,6 @@
 import builtins
 
+import shop.cli
 from shop.cli import ShopApp
 
 
@@ -102,3 +103,23 @@ def test_run_rejects_unknown_choice(monkeypatch, capsys):
     ShopApp().run()
 
     assert "Неверный ввод" in capsys.readouterr().out
+
+
+def test_new_sort_algorithm_appears_in_menu_without_changing_the_interface(monkeypatch, capsys):
+    """Расширение: достаточно добавить алгоритм в реестр, код меню менять не нужно."""
+    calls = []
+
+    def custom_sort(items, key_func, reverse=False, show_steps=False):
+        calls.append(len(items))
+        return list(items)
+
+    monkeypatch.setattr(shop.cli, "ALGORITHMS", [*shop.cli.ALGORITHMS, ("Тестовая", custom_sort)])
+    app = ShopApp()
+    feed_inputs(monkeypatch, ["1"])
+    app.add_to_cart()
+    feed_inputs(monkeypatch, ["1", "5", "1", "n"])  # критерий 1, пятый алгоритм
+
+    app.sort_cart()
+
+    assert "5 - Тестовая" in capsys.readouterr().out
+    assert calls == [1]

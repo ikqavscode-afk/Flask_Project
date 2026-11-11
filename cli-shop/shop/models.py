@@ -36,22 +36,11 @@ class Catalog:
     def add_product(self, product):
         self.products.append(product)
 
-    def edit_product(self, index, **kwargs):
-        for key, value in kwargs.items():
-            if hasattr(self.products[index], key):
-                setattr(self.products[index], key, value)
-
     def remove_product(self, index):
         del self.products[index]
 
     def get_list(self):
         return self.products
-
-    def find_by_name(self, name):
-        for p in self.products:
-            if p.name.lower() == name.lower():
-                return p
-        return None
 
     def __len__(self):
         return len(self.products)

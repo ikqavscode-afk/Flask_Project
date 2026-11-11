@@ -68,7 +68,8 @@ def test_added_product_is_saved_and_restored(tmp_path, monkeypatch):
     restored = ShopApp(catalog_path=path)
 
     assert len(restored.catalog) == 8
-    added = restored.catalog.find_by_name("чай")
+    added = restored.catalog.get_list()[-1]  # новый товар добавляется в конец
+    assert added.name == "Чай"
     assert added.price == 150.5
     assert added.description == "Зелёный"
 
