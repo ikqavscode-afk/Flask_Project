@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py config.py validation.py ./
 COPY static ./static
 COPY templates ./templates
+COPY migrations ./migrations
 
 # Запуск не от root; /data — папка для базы данных
 RUN useradd --create-home appuser && mkdir /data && chown appuser /data
@@ -22,4 +23,5 @@ ENV APP_ENV=production \
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT} --workers 2 main:app"]
+# Сначала применяем миграции базы, затем запускаем сервер
+CMD ["sh", "-c", "flask --app main db upgrade && gunicorn --bind 0.0.0.0:${PORT} --workers 2 main:app"]

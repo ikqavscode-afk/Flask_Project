@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, render_template,request, redirect, url_for, flash
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -31,6 +32,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CARDS_PER_PAGE = 6
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login' # редирект неавторизованных пользователей
@@ -230,11 +232,6 @@ def delete_card(id):
 
     flash('Карточка удалена', 'success')
     return redirect(url_for('index'))
-
-
-# Таблицы создаются при импорте, чтобы приложение работало и под gunicorn
-with app.app_context():
-    db.create_all()
 
 
 # Запуск для разработки (в продакшене используется gunicorn)

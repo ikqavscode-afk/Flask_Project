@@ -20,7 +20,7 @@
 
 ## Технологии
 
-Python 3, Flask, Flask-Login, Flask-SQLAlchemy, Flask-WTF, SQLite, gunicorn, Docker, Jinja2, HTML5, CSS3, pytest, pytest-cov.
+Python 3, Flask, Flask-Login, Flask-SQLAlchemy, Flask-Migrate, Flask-WTF, SQLite, gunicorn, Docker, Jinja2, HTML5, CSS3, pytest, pytest-cov.
 
 ## Структура
 
@@ -29,6 +29,7 @@ flask-diary/
 ├── main.py             # приложение, модели, маршруты
 ├── config.py           # настройки окружения (ключ, cookie)
 ├── validation.py       # проверка вводимых данных
+├── migrations/         # миграции базы данных
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
@@ -67,7 +68,15 @@ flask-diary/
 
 ## База данных
 
-SQLite, создаётся автоматически при первом запуске.
+SQLite по умолчанию; адрес задаётся переменной `DATABASE_URL`. Схема управляется миграциями (Flask-Migrate / Alembic), они лежат в `migrations/`.
+
+```bash
+flask --app main db upgrade                      # применить миграции
+flask --app main db migrate -m "описание"        # создать миграцию после изменения моделей
+flask --app main db downgrade                    # откатить последнюю миграцию
+```
+
+Если у вас осталась база, созданная до появления миграций, отметьте её текущей версией: `flask --app main db stamp head`. В Docker миграции применяются автоматически при старте контейнера. Автотест следит, чтобы миграции совпадали с моделями.
 
 - `users` — `id`, `username` (уникальное), `password` (хеш);
 - `card` — `id`, `title`, `subtitle`, `text`, `user_id` (владелец).
@@ -79,6 +88,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export SECRET_KEY="длинная-случайная-строка"
+flask --app main db upgrade      # создать или обновить таблицы
 FLASK_DEBUG=1 python main.py
 ```
 
