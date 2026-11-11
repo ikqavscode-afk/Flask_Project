@@ -10,7 +10,7 @@ gunicorn==27.0.0
 itsdangerous==2.2.0
 Jinja2==3.1.6
 Mako==1.4.3
-MarkupSafe==3.0.3
+MarkupSafe==3.0.4
 psycopg-binary==3.3.8
 psycopg==3.3.8
 SQLAlchemy==2.0.52
