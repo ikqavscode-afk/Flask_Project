@@ -61,3 +61,28 @@ def test_cookie_flags_in_production():
     assert settings["REMEMBER_COOKIE_SECURE"] is True
     assert settings["SESSION_COOKIE_HTTPONLY"] is True
     assert settings["SESSION_COOKIE_SAMESITE"] == "Lax"
+
+
+from config import engine_options, normalize_database_url  # noqa: E402
+
+
+@pytest.mark.parametrize(
+    "url, expected",
+    [
+        ("postgres://u:p@host:5432/db", "postgresql+psycopg://u:p@host:5432/db"),
+        ("postgresql://u:p@host/db", "postgresql+psycopg://u:p@host/db"),
+        ("postgresql+psycopg://u:p@host/db", "postgresql+psycopg://u:p@host/db"),
+        ("sqlite:///diary.db", "sqlite:///diary.db"),
+        ("sqlite:///:memory:", "sqlite:///:memory:"),
+    ],
+)
+def test_normalize_database_url(url, expected):
+    assert normalize_database_url(url) == expected
+
+
+def test_engine_options_for_postgres_enable_pre_ping():
+    assert engine_options("postgresql+psycopg://u:p@h/db") == {"pool_pre_ping": True}
+
+
+def test_engine_options_for_sqlite_are_empty():
+    assert engine_options("sqlite:///diary.db") == {}

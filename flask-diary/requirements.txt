@@ -11,6 +11,8 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 Mako==1.4.3
 MarkupSafe==3.0.3
+psycopg-binary==3.3.8
+psycopg==3.3.8
 SQLAlchemy==2.0.52
 typing_extensions==4.16.0
 Werkzeug==3.1.8

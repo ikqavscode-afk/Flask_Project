@@ -20,7 +20,7 @@
 
 ## Технологии
 
-Python 3, Flask, Flask-Login, Flask-SQLAlchemy, Flask-Migrate, Flask-WTF, SQLite, gunicorn, Docker, Jinja2, HTML5, CSS3, pytest, pytest-cov.
+Python 3, Flask, Flask-Login, Flask-SQLAlchemy, Flask-Migrate, Flask-WTF, SQLite, PostgreSQL, gunicorn, Docker, Jinja2, HTML5, CSS3, pytest, pytest-cov.
 
 ## Структура
 
@@ -68,7 +68,14 @@ flask-diary/
 
 ## База данных
 
-SQLite по умолчанию; адрес задаётся переменной `DATABASE_URL`. Схема управляется миграциями (Flask-Migrate / Alembic), они лежат в `migrations/`.
+SQLite по умолчанию; адрес задаётся переменной `DATABASE_URL`. Поддерживается и PostgreSQL (драйвер psycopg 3). Адреса вида `postgres://…` и `postgresql://…`, которые выдают хостинги, приводятся к нужному виду автоматически, для PostgreSQL включена проверка соединения перед использованием:
+
+```bash
+export DATABASE_URL="postgresql://пользователь:пароль@хост:5432/имя_базы"
+flask --app main db upgrade
+```
+
+Автотесты в CI выполняются и на SQLite, и на PostgreSQL 16. Чтобы запустить их на своём PostgreSQL, задайте `TEST_DATABASE_URL` с адресом **отдельной тестовой** базы: тесты создают и удаляют в ней таблицы. Схема управляется миграциями (Flask-Migrate / Alembic), они лежат в `migrations/`.
 
 ```bash
 flask --app main db upgrade                      # применить миграции
@@ -104,7 +111,8 @@ FLASK_DEBUG=1 python main.py
 |---|---|---|
 | `APP_ENV` | `development` или `production` | `development` |
 | `SECRET_KEY` | ключ подписи сессий и токенов | значение для разработки только в `development` |
-| `DATABASE_URL` | адрес базы данных | `sqlite:///diary.db` |
+| `DATABASE_URL` | адрес базы данных (SQLite или PostgreSQL) | `sqlite:///diary.db` |
+| `TEST_DATABASE_URL` | адрес тестовой базы для автотестов | SQLite в памяти |
 | `FLASK_DEBUG` | `1` включает отладку при `python main.py` | выключено |
 
 В режиме `production` приложение не запустится без надёжного `SECRET_KEY` (не короче 16 символов, не значение для разработки). Пример — в `.env.example`. Случайный ключ можно получить так: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`.

@@ -53,3 +53,27 @@ def security_settings(env=None):
         settings["SESSION_COOKIE_SECURE"] = True
         settings["REMEMBER_COOKIE_SECURE"] = True
     return settings
+
+
+def normalize_database_url(url):
+    """Приводит адрес базы к виду, понятному SQLAlchemy с драйвером psycopg 3.
+
+    Хостинги выдают адреса вида postgres:// или postgresql://, а SQLAlchemy 2
+    не принимает первый вариант и для второго ожидает драйвер psycopg2.
+    """
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    return url
+
+
+def engine_options(url):
+    """Параметры подключения: для PostgreSQL проверяем соединение перед использованием.
+
+    Хостинги закрывают простаивающие соединения, без проверки следующий
+    запрос мог бы завершиться ошибкой.
+    """
+    if url.startswith("postgresql"):
+        return {"pool_pre_ping": True}
+    return {}

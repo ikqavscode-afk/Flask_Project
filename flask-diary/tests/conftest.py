@@ -1,7 +1,9 @@
 import os
 
 # Должно быть задано до импорта приложения: адрес БД читается при создании engine.
-os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+# По умолчанию тесты идут на SQLite в памяти; для проверки на PostgreSQL
+# задайте TEST_DATABASE_URL (например, в CI).
+os.environ['DATABASE_URL'] = os.environ.get('TEST_DATABASE_URL', 'sqlite:///:memory:')
 
 import pytest
 

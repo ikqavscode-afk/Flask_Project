@@ -9,7 +9,13 @@ from flask_login import (LoginManager, UserMixin, login_required, login_user, cu
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from config import get_secret_key, is_production, security_settings
+from config import (
+    engine_options,
+    get_secret_key,
+    is_production,
+    normalize_database_url,
+    security_settings,
+)
 from validation import validate_card, validate_password, validate_username
 
 
@@ -23,10 +29,11 @@ if is_production():
     # X-Forwarded-Proto и X-Forwarded-Host от одного прокси.
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    'DATABASE_URL',
-    'sqlite:///diary.db'
+DATABASE_URL = normalize_database_url(
+    os.environ.get('DATABASE_URL', 'sqlite:///diary.db')
 )
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options(DATABASE_URL)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CARDS_PER_PAGE = 6
