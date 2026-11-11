@@ -4,6 +4,7 @@
 и добавьте его в ``_blueprints()``. Подробности: docs/architecture.md.
 """
 
+import mimetypes
 import os
 
 from flask import Flask
@@ -12,6 +13,10 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from .extensions import csrf, db, login_manager, migrate
 from .logging_setup import configure_logging, get_log_level
 from .settings import is_production, load_config
+
+# В минимальных образах Docker нет системной таблицы типов файлов, и Python отдаёт .webp
+# как application/octet-stream. Регистрируем тип явно, чтобы он не зависел от окружения.
+mimetypes.add_type('image/webp', '.webp')
 
 
 def _blueprints():
