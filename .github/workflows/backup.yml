@@ -1,0 +1,58 @@
+# Ежедневная зашифрованная копия базы Render и автоматическая проверка восстановления.
+#
+# Включается владельцем: до тех пор запуск пропускается (нет ошибок и шума).
+# Подготовка (один раз), см. docs/deployment.md, раздел «Резервные копии»:
+#   1. Settings → Secrets and variables → Actions → Secrets:
+#        BACKUP_DATABASE_URL  внешний адрес базы из панели Render (содержит пароль, никому не показывайте)
+#        BACKUP_PASSPHRASE    длинный случайный пароль для шифрования копий (сохраните его отдельно!)
+#   2. Variables: BACKUP_ENABLED = true
+#
+# Репозиторий публичный: файл копии шифруется (AES-256), без пароля он бесполезен.
+# Без пароля BACKUP_PASSPHRASE восстановить данные нельзя: храните его вне GitHub.
+name: Backup database
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    if: ${{ vars.BACKUP_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        # Временная база для проверки восстановления (версия как на Render)
+        image: postgres:16
+        env:
+          POSTGRES_USER: check
+          POSTGRES_PASSWORD: check
+          POSTGRES_DB: check
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U check -d check"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL 16 client
+        # Версия клиента не должна быть старше версии сервера базы
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client-16
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+      - name: Back up and verify restore
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          RESTORE_CHECK_URL: postgresql://check:check@localhost:5432/check
+        run: scripts/backup_db.sh backups
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diary-backup-${{ github.run_id }}
+          path: backups/*.dump.enc
+          retention-days: 30
+          if-no-files-found: error
