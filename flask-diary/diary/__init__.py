@@ -50,6 +50,7 @@ def create_app(overrides=None):
     login_manager.init_app(app)
 
     from . import models  # noqa: F401  (регистрирует модели для Alembic)
+    from .core.assets import register_asset_caching
     from .core.errors import register_error_handlers
     from .core.security import register_security_headers
 
@@ -57,5 +58,6 @@ def create_app(overrides=None):
         app.register_blueprint(blueprint)
     register_error_handlers(app)
     register_security_headers(app)
+    register_asset_caching(app)
 
     return app

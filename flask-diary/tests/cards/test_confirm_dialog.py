@@ -61,7 +61,7 @@ def test_card_page_has_no_browser_confirm_and_loads_script(client):
 
     assert 'confirm(' not in page
     assert 'js/confirm-dialog.js' in page
-    assert re.search(r'<script src="[^"]*confirm-dialog\.js" defer></script>', page)
+    assert re.search(r'<script src="[^"]*confirm-dialog\.js(\?v=[0-9a-f]+)?" defer></script>', page)
 
 
 def test_dialog_script_is_served(client):
