@@ -10,3 +10,5 @@ migrate = Migrate()
 csrf = CSRFProtect()
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"  # куда перенаправлять неавторизованных
+# Стандартный текст Flask-Login английский; пользователь видит его на странице входа
+login_manager.login_message = "Войдите, чтобы открыть эту страницу."

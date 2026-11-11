@@ -1,4 +1,4 @@
-from tests.helpers import login, register
+from tests.helpers import html, login, register
 
 
 def test_login_success_redirects_to_index(client):
@@ -67,3 +67,23 @@ def test_header_has_logout_form_not_link(client):
 
     assert 'action="/logout/"' in html
     assert 'href="/logout/"' not in html
+
+
+def test_login_required_message_is_in_russian(client):
+    page = html(client.get('/', follow_redirects=True))
+
+    assert 'Войдите, чтобы открыть эту страницу.' in page
+    assert 'Please log in' not in page
+
+
+def test_login_page_after_redirect_ignores_next_parameter(client):
+    """Параметр next не даёт открытого перенаправления: вход ведёт только на главную."""
+    register(client)
+
+    response = client.post(
+        '/login/?next=https://evil.example/',
+        data={'username': 'alice', 'password': 'secret123'},
+    )
+
+    assert response.status_code == 302
+    assert 'evil.example' not in response.headers['Location']
