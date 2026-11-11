@@ -41,3 +41,23 @@ def test_production_rejects_missing_or_weak_key(env):
 )
 def test_is_production(env, expected):
     assert is_production(env) is expected
+
+
+from config import security_settings  # noqa: E402
+
+
+def test_cookie_flags_in_development():
+    settings = security_settings({})
+
+    assert settings["SESSION_COOKIE_HTTPONLY"] is True
+    assert settings["SESSION_COOKIE_SAMESITE"] == "Lax"
+    assert "SESSION_COOKIE_SECURE" not in settings
+
+
+def test_cookie_flags_in_production():
+    settings = security_settings({"APP_ENV": "production"})
+
+    assert settings["SESSION_COOKIE_SECURE"] is True
+    assert settings["REMEMBER_COOKIE_SECURE"] is True
+    assert settings["SESSION_COOKIE_HTTPONLY"] is True
+    assert settings["SESSION_COOKIE_SAMESITE"] == "Lax"

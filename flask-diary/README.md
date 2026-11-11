@@ -127,6 +127,8 @@ pytest --cov=main --cov-report=term-missing
 - пароли хешируются (`werkzeug.security`);
 - секретный ключ берётся из переменной окружения;
 - все POST-формы защищены CSRF-токеном;
+- cookie сессии с флагами `HttpOnly` и `SameSite=Lax`, а в режиме `production` ещё и `Secure`;
+- за прокси хостинга учитываются заголовки `X-Forwarded-Proto` и `X-Forwarded-Host`;
 - доступ к карточкам проверяется по владельцу на сервере.
 
 ## Планы по развитию

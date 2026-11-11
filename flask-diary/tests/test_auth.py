@@ -240,3 +240,38 @@ def test_create_form_page_opens(client):
 
     assert response.status_code == 200
     assert 'Создание карточки'.encode('utf-8') in response.data
+
+
+def session_cookie_header(response):
+    cookies = [c for c in response.headers.getlist('Set-Cookie') if c.startswith('session=')]
+    assert cookies, 'cookie сессии не установлена'
+    return cookies[0]
+
+
+def test_session_cookie_has_httponly_and_samesite(client):
+    register(client)
+
+    response = client.post(
+        '/login/', data={'username': 'alice', 'password': 'secret123'}
+    )
+
+    header = session_cookie_header(response)
+    assert 'HttpOnly' in header
+    assert 'SameSite=Lax' in header
+
+
+def test_session_cookie_is_secure_when_enabled(test_app, client, monkeypatch):
+    monkeypatch.setitem(test_app.config, 'SESSION_COOKIE_SECURE', True)
+    client.post(
+        '/register',
+        data={'username': 'alice', 'password': 'secret123'},
+        base_url='https://localhost',
+    )
+
+    response = client.post(
+        '/login/',
+        data={'username': 'alice', 'password': 'secret123'},
+        base_url='https://localhost',
+    )
+
+    assert 'Secure' in session_cookie_header(response)

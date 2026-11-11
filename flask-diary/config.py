@@ -34,3 +34,22 @@ def get_secret_key(env=None):
             f"не короче {MIN_SECRET_KEY_LENGTH} символов."
         )
     return key
+
+
+def security_settings(env=None):
+    """Настройки cookie сессии и «запомнить меня».
+
+    HttpOnly и SameSite=Lax включены всегда. Secure (только по HTTPS)
+    включается в режиме production, чтобы локальная работа по HTTP
+    оставалась возможной.
+    """
+    settings = {
+        "SESSION_COOKIE_HTTPONLY": True,
+        "SESSION_COOKIE_SAMESITE": "Lax",
+        "REMEMBER_COOKIE_HTTPONLY": True,
+        "REMEMBER_COOKIE_SAMESITE": "Lax",
+    }
+    if is_production(env):
+        settings["SESSION_COOKIE_SECURE"] = True
+        settings["REMEMBER_COOKIE_SECURE"] = True
+    return settings

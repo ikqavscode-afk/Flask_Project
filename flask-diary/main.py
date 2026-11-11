@@ -6,11 +6,19 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (LoginManager, UserMixin, login_required, login_user, current_user, logout_user)
 
-from config import get_secret_key
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+from config import get_secret_key, is_production, security_settings
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = get_secret_key()
+app.config.update(security_settings())
+
+if is_production():
+    # За прокси хостинга (HTTPS завершается на нём): доверяем заголовкам
+    # X-Forwarded-Proto и X-Forwarded-Host от одного прокси.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'DATABASE_URL',
