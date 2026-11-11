@@ -10,6 +10,11 @@ on:
   schedule:
     - cron: "*/10 * * * *"
   workflow_dispatch:
+    inputs:
+      url:
+        description: "Адрес для проверки (необязательно). Для проверки письма укажите несуществующий, например https://example.invalid"
+        required: false
+        type: string
 
 jobs:
   health:
@@ -20,5 +25,5 @@ jobs:
       - name: Check /health
         env:
           # Адрес можно сменить в Settings → Secrets and variables → Actions → Variables (APP_URL)
-          APP_URL: ${{ vars.APP_URL || 'https://flask-diary-vwos.onrender.com' }}
+          APP_URL: ${{ inputs.url || vars.APP_URL || 'https://flask-diary-vwos.onrender.com' }}
         run: scripts/check_health.sh "$APP_URL" 3 20
