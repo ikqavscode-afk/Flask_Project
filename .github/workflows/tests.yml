@@ -115,7 +115,7 @@ jobs:
       - name: Check that the app responds
         run: |
           for i in $(seq 1 15); do
-            if curl -fsS http://localhost:8000/home > /dev/null; then
+            if curl -fsS http://localhost:8000/health > /dev/null; then
               echo "App is up"; exit 0
             fi
             sleep 1

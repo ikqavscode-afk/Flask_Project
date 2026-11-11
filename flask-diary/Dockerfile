@@ -23,5 +23,9 @@ ENV APP_ENV=production \
 
 EXPOSE 8000
 
+# Контейнер считается здоровым, если /health отвечает 200
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/health' % os.environ.get('PORT', '8000'), timeout=3)"
+
 # Сначала применяем миграции базы, затем запускаем сервер
 CMD ["sh", "-c", "flask --app main db upgrade && gunicorn --bind 0.0.0.0:${PORT} --workers 2 main:app"]

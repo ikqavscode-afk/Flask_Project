@@ -1,9 +1,10 @@
 import os
 
-from flask import Flask, render_template,request, redirect, url_for, flash
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (LoginManager, UserMixin, login_required, login_user, current_user, logout_user)
 
@@ -153,6 +154,26 @@ def index():
     return render_template(
         'index.html', cards=pagination.items, pagination=pagination, q=q
     )
+
+@app.route('/health')
+def health():
+    """Проверка работоспособности для хостинга и мониторинга.
+
+    Доступна без входа. Возвращает 200, если база отвечает, иначе 503.
+    Подробности ошибки наружу не отдаются.
+    """
+    try:
+        db.session.execute(text('SELECT 1'))
+        status, code = 'ok', 200
+    except Exception:
+        db.session.rollback()
+        status, code = 'error', 503
+
+    response = jsonify(status=status)
+    response.status_code = code
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
 
 @app.route('/home')
 def home():
