@@ -20,3 +20,8 @@ updates:
     directory: /flask-diary
     schedule:
       interval: weekly
+    ignore:
+      # Версия Python в образе должна совпадать с проверяемыми в CI (3.12 и 3.14):
+      # переход на новую версию делаем сами, сначала добавив её в матрицу тестов.
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
