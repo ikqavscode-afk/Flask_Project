@@ -30,9 +30,10 @@
                     Создать
                 </a>
 
-                <a href="{{ url_for('logout') }}">
-                    Выйти
-                </a>
+                <form class="nav-form" method="POST" action="{{ url_for('logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="nav-logout" type="submit">Выйти</button>
+                </form>
 
             {% else %}
 

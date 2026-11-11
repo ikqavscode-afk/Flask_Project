@@ -676,3 +676,29 @@ textarea:focus-visible {
         background-size: auto, 220px;
     }
 }
+
+/* Кнопка «Выйти» в шапке выглядит как остальные ссылки меню */
+.nav-form {
+    margin: 0;
+}
+
+.nav-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 18px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    background: rgba(99, 102, 241, .08);
+    border: 1px solid rgba(99, 102, 241, .18);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.nav-logout:hover {
+    background: rgba(99, 102, 241, .14);
+}

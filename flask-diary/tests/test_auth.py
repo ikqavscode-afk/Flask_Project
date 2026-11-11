@@ -70,7 +70,7 @@ def test_logout(client):
     register(client)
     login(client)
 
-    response = client.get('/logout/', follow_redirects=True)
+    response = client.post('/logout/', follow_redirects=True)
 
     assert 'Добро пожаловать'.encode('utf-8') in response.data
 
@@ -91,7 +91,7 @@ def test_user_sees_only_own_cards(client):
     register(client, username='alice')
     login(client, username='alice')
     create_card(client, title='Секрет Алисы')
-    client.get('/logout/')
+    client.post('/logout/')
 
     register(client, username='bob')
     response = login(client, username='bob')
@@ -103,7 +103,7 @@ def test_user_cannot_open_foreign_card(client):
     register(client, username='alice')
     login(client, username='alice')
     create_card(client)
-    client.get('/logout/')
+    client.post('/logout/')
 
     register(client, username='bob')
     login(client, username='bob')
@@ -155,7 +155,7 @@ def test_user_cannot_edit_or_delete_foreign_card(client):
     register(client, username='alice')
     login(client, username='alice')
     create_card(client)
-    client.get('/logout/')
+    client.post('/logout/')
 
     register(client, username='bob')
     login(client, username='bob')
@@ -275,3 +275,33 @@ def test_session_cookie_is_secure_when_enabled(test_app, client, monkeypatch):
     )
 
     assert 'Secure' in session_cookie_header(response)
+
+
+def test_logout_get_is_not_allowed(client):
+    register(client)
+    login(client)
+
+    response = client.get('/logout/')
+
+    assert response.status_code == 405
+    # сессия при этом не сброшена
+    assert client.get('/').status_code == 200
+
+
+def test_logout_requires_csrf_token(test_app, client):
+    register(client)
+    login(client)
+    test_app.config['WTF_CSRF_ENABLED'] = True
+
+    response = client.post('/logout/')
+
+    assert response.status_code == 400
+
+
+def test_header_has_logout_form_not_link(client):
+    register(client)
+    response = login(client)
+    html = response.data.decode('utf-8')
+
+    assert 'action="/logout/"' in html
+    assert 'href="/logout/"' not in html
