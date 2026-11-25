@@ -13,7 +13,7 @@ Mako==1.4.3
 MarkupSafe==3.0.4
 psycopg-binary==3.3.8
 psycopg==3.3.8
-SQLAlchemy==2.1.8
+SQLAlchemy==2.1.9
 typing_extensions==4.16.0
 Werkzeug==3.1.9
 WTForms==3.3.2
